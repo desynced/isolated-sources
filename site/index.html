@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Isolated Sources</title>
+  <meta name="description" content="Free PII scrubbing that stays in your browser.">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#f7f4ee">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap bar">
+      <p class="brand">
+        <svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#0e3b38"/>
+          <rect x="8" y="6" width="16" height="20" rx="2" fill="#f7f4ee"/>
+          <rect x="11" y="10" width="10" height="2" fill="#0e3b38"/>
+          <rect x="11" y="15" width="7" height="2" fill="#c9a227"/>
+          <rect x="11" y="20" width="10" height="2" fill="#0e3b38"/>
+        </svg>
+        <span>Isolated Sources</span>
+      </p>
+      <button type="button" id="clear-session" class="secondary">Clear session</button>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <p id="status" class="status" role="status"></p>
+    <ol class="progress" aria-label="Steps">
+      <li id="progress-paste" aria-current="step">Paste</li>
+      <li id="progress-review">Review</li>
+      <li id="progress-restore">Restore</li>
+    </ol>
+    <noscript>
+      <p class="noscript">This page needs JavaScript in your browser. The scrubber does not run without it, and it does not send your text anywhere.</p>
+    </noscript>
+
+    <section id="step-paste" class="step">
+      <div class="hero">
+        <h1>Free PII scrubbing that stays in your browser.</h1>
+        <ul class="hero-points">
+          <li>Light and private. Pure JavaScript, no model downloads, no servers. Your text never leaves your device.</li>
+          <li>Built for legal text. Catches case, docket, Bates and matter numbers, plus names from your own party list.</li>
+          <li>Restores exactly, or tells you why it can't. Paste the AI's answer back and every placeholder returns as it was. If one is missing or altered, it shows you which, and never guesses.</li>
+        </ul>
+        <p id="footnote" class="footnote">Helps identify and replace common identifiers. You must review before sharing.</p>
+      </div>
+      <h2 id="paste-heading">Paste text</h2>
+      <form id="paste-form" autocomplete="off">
+        <div class="field">
+          <label for="source-text">Text to scrub</label>
+          <textarea id="source-text" rows="10" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" translate="no" aria-describedby="source-hint"></textarea>
+          <p id="source-hint" class="hint">Nothing is saved. The mapping stays in this tab until you clear the session or close the tab.</p>
+        </div>
+        <div class="field">
+          <label for="known-parties">Known parties</label>
+          <textarea id="known-parties" rows="4" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" translate="no" aria-describedby="parties-hint"></textarea>
+          <p id="parties-hint" class="hint">Optional. One name per line.</p>
+        </div>
+        <p id="paste-error" class="alert" role="alert" tabindex="-1"></p>
+        <div class="actions">
+          <button type="submit" id="scrub-button">Scrub</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="step-review" class="step" hidden>
+      <h2 id="review-heading" tabindex="-1">Review what was flagged</h2>
+      <div class="panel-head">
+        <h3 id="scrubbed-heading">Scrubbed text</h3>
+        <button type="button" id="copy-scrubbed">Copy scrubbed text</button>
+      </div>
+      <div id="scrubbed-view" class="text-out" role="region" aria-labelledby="scrubbed-heading" translate="no"></div>
+      <p id="review-footnote" class="footnote">Helps identify and replace common identifiers. You must review before sharing.</p>
+
+      <h3 id="findings-heading" tabindex="-1">Findings</h3>
+      <p id="findings-summary"></p>
+      <p id="findings-empty" hidden>Nothing was flagged. Select anything that should be replaced and flag it below.</p>
+      <ul id="findings" class="finding-list"></ul>
+
+      <section id="residual" aria-labelledby="residual-heading"></section>
+
+      <h3 id="flag-heading">Flag a missed span</h3>
+      <p id="flag-hint" class="hint">Select a missed span in the source, or in the scrubbed text outside a placeholder, then flag it.</p>
+      <div class="field">
+        <label for="missed-source">Source text</label>
+        <textarea id="missed-source" rows="8" readonly autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" translate="no" aria-describedby="flag-hint"></textarea>
+      </div>
+      <div class="flag-row">
+        <div class="field">
+          <label for="flag-kind">Kind of identifier</label>
+          <select id="flag-kind"></select>
+        </div>
+        <button type="button" id="flag-selection">Flag selected text</button>
+      </div>
+      <p id="flag-error" class="alert" role="alert" tabindex="-1"></p>
+      <div class="actions">
+        <button type="button" id="edit-text" class="secondary">Edit text</button>
+        <button type="button" id="continue-restore">Continue to restore</button>
+      </div>
+    </section>
+
+    <section id="step-restore" class="step" hidden>
+      <h2 id="restore-heading" tabindex="-1">Restore</h2>
+      <p>Paste the AI's answer. Exact placeholders are put back. Missing or altered placeholders are listed and left as written.</p>
+      <form id="restore-form" autocomplete="off">
+        <div class="field">
+          <label for="ai-answer">AI answer</label>
+          <textarea id="ai-answer" rows="8" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" translate="no"></textarea>
+        </div>
+        <p id="restore-error" class="alert" role="alert" tabindex="-1"></p>
+        <div class="actions">
+          <button type="submit" id="restore-button">Restore</button>
+        </div>
+      </form>
+      <div id="restore-result" hidden>
+        <div class="panel-head">
+          <h3 id="restore-result-heading" tabindex="-1">Restored text</h3>
+          <button type="button" id="copy-restored" class="secondary">Copy restored text</button>
+        </div>
+        <pre id="restored-view" class="text-out" translate="no"></pre>
+        <p id="restore-summary"></p>
+        <section id="missing-section" aria-labelledby="missing-heading">
+          <h3 id="missing-heading">Missing placeholders</h3>
+          <p id="missing-lead"></p>
+          <ul id="missing-list"></ul>
+        </section>
+        <section id="altered-section" aria-labelledby="altered-heading">
+          <h3 id="altered-heading">Altered placeholders</h3>
+          <p id="altered-lead"></p>
+          <ul id="altered-list"></ul>
+        </section>
+      </div>
+      <div class="actions">
+        <button type="button" id="back-to-review" class="secondary">Back to review</button>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="memory-note">The mapping is held in memory for this tab. Clear session drops it.</p>
+      <ul class="footer-links">
+        <li><a href="https://github.com/desynced/isolated-sources" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">GitHub<span class="visually-hidden"> (opens in a new tab)</span></a></li>
+        <li><a href="https://github.com/desynced/isolated-sources/blob/main/LICENSE" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">MIT License<span class="visually-hidden"> (opens in a new tab)</span></a></li>
+        <li>Recognizers for common identifiers are ported from <a href="https://github.com/microsoft/presidio" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">Microsoft Presidio<span class="visually-hidden"> (opens in a new tab)</span></a>.</li>
+        <li id="tip-item" hidden><a id="tip-link" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">Leave a tip<span class="visually-hidden"> (opens in a new tab)</span></a></li>
+      </ul>
+    </div>
+  </footer>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

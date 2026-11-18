@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #1c1915;
+  background: #f7f4ee;
+  line-height: 1.5;
+}
+
+.wrap {
+  width: min(42rem, calc(100% - 2rem));
+  margin: 4rem auto;
+}
+
+a {
+  color: #0b3f8a;
+}
+
+a:focus-visible {
+  outline: 3px solid #0b57d0;
+  outline-offset: 2px;
+}
