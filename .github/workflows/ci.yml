@@ -16,3 +16,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - run: npm run build:site
+      - run: grep -q "connect-src 'none'" site/dist/index.html
+      - run: grep -q "frame-ancestors 'none'" site/dist/_headers
+      - run: if grep -q "unsafe-inline" site/dist/index.html; then exit 1; fi

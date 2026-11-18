@@ -24,6 +24,14 @@ const back = restore(modelOutput, mapping);
 
 `findings` is the review list. `residual` is the second pass on the scrubbed text. `back.missing` and `back.altered` are placeholders the model dropped or changed.
 
+## Site
+
+The public page lives in `site/`. It scrubs and restores with this package in the browser. The mapping stays in memory for the tab.
+
+Run `npm install`, then `npm run dev:site`, and open the local URL Vite prints.
+
+`npm run build:site` typechecks the page and writes the static files to `site/dist`. A Cloudflare Workers static-assets deploy can serve that folder (`wrangler.jsonc` points at it). `npm test` includes the site flow.
+
 ## License
 
 MIT © Joe Ball
