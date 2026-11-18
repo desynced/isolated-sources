@@ -38,7 +38,7 @@ describe("site privacy boundaries", () => {
     }
 
     const config = readFileSync(join(root, "site", "src", "config.ts"), "utf8");
-    expect(config).toMatch(/PAYPAL_ME_URL\s*=\s*""/);
+    expect(config).toMatch(/PAYPAL_ME_URL\s*=\s*"https:\/\/paypal\.me\/josephball"/);
 
     const wrangler = readFileSync(join(root, "wrangler.jsonc"), "utf8");
     expect(wrangler).toContain('"./site/dist"');

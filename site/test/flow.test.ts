@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "../src/app.js";
+import { PAYPAL_ME_URL } from "../src/config.js";
 import { applyTipLink } from "../src/tip.js";
 
 function importPath(): string {
@@ -73,7 +74,7 @@ describe("site page", () => {
     vi.unstubAllGlobals();
   });
 
-  it("shows the homepage copy, footer, labels, and a hidden tip link", () => {
+  it("shows the homepage copy, footer, labels, and the configured tip link", () => {
     expect(document.querySelector("h1")?.textContent).toBe("Free PII scrubbing that stays in your browser.");
     expect([...document.querySelectorAll(".hero-points li")].map((item) => item.textContent)).toEqual(HERO);
     expect(document.getElementById("footnote")?.textContent).toBe(
@@ -88,6 +89,13 @@ describe("site page", () => {
     expect(document.querySelector('a[href*="LICENSE"]')?.textContent).toContain("MIT License");
     expect(document.body.textContent).toContain("Microsoft Presidio");
     expect(hidden("tip-item")).toBe(true);
+    const tip = document.getElementById("tip-link");
+    const tipItem = document.getElementById("tip-item");
+    if (!(tip instanceof HTMLAnchorElement) || !(tipItem instanceof HTMLElement)) throw new Error("tip link missing");
+    applyTipLink(tip, tipItem, PAYPAL_ME_URL);
+    expect(tipItem.hidden).toBe(false);
+    expect(tip.href).toBe("https://paypal.me/josephball");
+    expect(tip.textContent).toContain("Leave a tip");
 
     for (const control of document.querySelectorAll("textarea, select")) {
       expect(control.id, control.outerHTML).not.toBe("");

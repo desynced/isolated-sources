@@ -32,6 +32,12 @@ Run `npm install`, then `npm run dev:site`, and open the local URL Vite prints.
 
 `npm run build:site` typechecks the page and writes the static files to `site/dist`. A Cloudflare Workers static-assets deploy can serve that folder (`wrangler.jsonc` points at it). `npm test` includes the site flow.
 
+## Roadmap
+
+### Soon
+
+Verified PDF redaction: flatten or rasterize redacted pages and check that no text layer remains under the redactions. The check looks at the file you produce. It is not a security guarantee, and you still have to review the result before you rely on it.
+
 ## License
 
 MIT © Joe Ball
