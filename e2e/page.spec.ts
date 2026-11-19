@@ -118,6 +118,11 @@ test("strip, hidden check, and receipt work after the page goes offline", async 
     if (!ready) throw new Error("tool chunks were not started with the page");
     await ready;
   });
+  const offlineRequests: string[] = [];
+  page.on("request", (request) => {
+    const url = request.url();
+    if (url.startsWith("http://") || url.startsWith("https://")) offlineRequests.push(url);
+  });
   await page.context().setOffline(true);
 
   await page.locator("#metadata-file").setInputFiles({
@@ -146,4 +151,5 @@ test("strip, hidden check, and receipt work after the page goes offline", async 
   ]);
   expect(download.suggestedFilename()).toBe("isolated-sources-receipt.zip");
   await expect(page.locator("#status")).toContainText("Original values were left out");
+  expect(offlineRequests).toEqual([]);
 });

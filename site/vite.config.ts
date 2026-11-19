@@ -73,6 +73,7 @@ export default defineConfig({
       input: {
         main: join(root, "index.html"),
         bookmarklet: join(root, "bookmarklet.html"),
+        scrubSelection: join(root, "scrub-selection.html"),
         ocr: join(root, "ocr.html"),
       },
     },
