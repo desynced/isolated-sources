@@ -54,9 +54,11 @@ export function injectCsp(html: string, policy = META_CSP): string {
  * matches, so a later rule has to detach the strict policy with
  * `! Content-Security-Policy` before it sets the OCR policy. html_handling
  * auto-trailing-slash answers `/ocr.html` with a 307 to `/ocr`, so the OCR
- * rules are `/ocr` and `/ocr/*`, not only `/ocr.html`. `/bookmarklet*` drops
- * Cross-Origin-Opener-Policy and sets unsafe-none so a cross-origin
- * bookmarklet tab can still see window.opener.
+ * rules are `/ocr` and `/ocr/*`, not only `/ocr.html`. `/bookmarklet*` and
+ * `/scrub-selection*` drop Cross-Origin-Opener-Policy and set unsafe-none
+ * so a cross-origin bookmarklet tab can still see window.opener. They do
+ * not set Content-Security-Policy again: `/*` already applied the strict
+ * policy, and a second set would stack.
  */
 export function headersDocument(): string {
   return [
@@ -82,6 +84,10 @@ export function headersDocument(): string {
     `  Content-Security-Policy: ${OCR_HEADER_CSP}`,
     "",
     "/bookmarklet*",
+    "  ! Cross-Origin-Opener-Policy",
+    "  Cross-Origin-Opener-Policy: unsafe-none",
+    "",
+    "/scrub-selection*",
     "  ! Cross-Origin-Opener-Policy",
     "  Cross-Origin-Opener-Policy: unsafe-none",
     "",
