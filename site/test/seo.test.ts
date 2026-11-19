@@ -33,6 +33,7 @@ describe("search and icons", () => {
     expect(robots).toContain("Sitemap: https://isolatedsources.com/sitemap.xml");
     const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
     expect(sitemap).toContain("<loc>https://isolatedsources.com/</loc>");
+    expect(sitemap).toContain("<loc>https://isolatedsources.com/privacy</loc>");
     expect(sitemap).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
   });
 

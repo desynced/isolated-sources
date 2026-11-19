@@ -4,6 +4,7 @@
   --paper: #f7f4ee;
   --line: #d5cec2;
   --teal: #0e3b38;
+  --muted: #3d3832;
   --focus: #0b57d0;
 }
 
@@ -53,7 +54,7 @@ body {
 }
 
 main {
-  padding-bottom: 3rem;
+  padding-bottom: 1rem;
 }
 
 h1 {
@@ -73,4 +74,25 @@ a {
 a:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
+}
+
+.memory-note {
+  color: var(--muted);
+  margin: 0;
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: #fff;
+  padding: 1.25rem 0 2rem;
+  margin-top: 1rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 0;
 }

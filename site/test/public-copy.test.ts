@@ -21,6 +21,7 @@ describe("public site copy", () => {
       ...filesIn(join(root, "site", "src")),
       ...filesIn(join(root, "site", "public")),
       join(root, "site", "index.html"),
+      join(root, "site", "privacy.html"),
     ];
     const source = paths.map((path) => readFileSync(path, "utf8")).join("\n");
     expect(source.toLowerCase()).not.toContain("github.com");
