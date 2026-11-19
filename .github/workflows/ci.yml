@@ -33,6 +33,7 @@ jobs:
           grep -q "Content-Signal: search=yes, ai-input=no, ai-train=no" site/dist/robots.txt
       - run: if grep -q "unsafe-inline" site/dist/index.html; then exit 1; fi
       - run: if grep -R -n "github.com" site/dist; then exit 1; fi
+      - run: if grep -R -n "jsdelivr.net" site/dist; then exit 1; fi
       - run: grep -q "Copyright (c) Presidio Contributors" site/dist/NOTICE
       - run: grep -q "Madison May" site/dist/NOTICE
       - run: grep -q "Andrew Dillon" site/dist/NOTICE

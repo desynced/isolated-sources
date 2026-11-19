@@ -40,12 +40,6 @@ Run `npm install`, then `npm run dev:site`, and open the local URL Vite prints.
 
 - Verified PDF redaction: flatten or rasterize redacted pages and check that no text layer remains under the redactions. The check looks at the file you produce. It is not a security guarantee, and you still have to review the result before you rely on it.
 
-### Later
-
-Bookmarklet to scrub text selected on another page. It runs on that other website, so this site's security policy and the airplane-mode self-test do not apply there. It does not send the text anywhere.
-
-Optional OCR for scanned PDFs and images. It stays off unless you choose a separate download of the engine and language data from this site. The main page does not load them.
-
 ## License
 
 MIT © Joe Ball

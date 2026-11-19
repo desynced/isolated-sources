@@ -28,12 +28,36 @@ export const HEADER_CSP = [...SHARED, "frame-ancestors 'none'", "upgrade-insecur
 /** One year, including subdomains. Browsers honor this only on HTTPS responses. */
 export const STRICT_TRANSPORT_SECURITY = "max-age=31536000; includeSubDomains";
 
-export function injectCsp(html: string): string {
-  const meta = `<meta http-equiv="Content-Security-Policy" content="${META_CSP}">`;
+/**
+ * OCR page only. Wasm compilation needs wasm-unsafe-eval, and the worker
+ * reads the engine files from this origin. The main page does not use this.
+ */
+const OCR_SHARED = SHARED.map((part) => {
+  if (part === "script-src 'self'") return "script-src 'self' 'wasm-unsafe-eval'";
+  if (part === "connect-src 'none'") return "connect-src 'self'";
+  if (part === "worker-src 'none'") return "worker-src 'self'";
+  return part;
+});
+
+export const OCR_META_CSP = OCR_SHARED.join("; ");
+
+export const OCR_HEADER_CSP = [...OCR_SHARED, "frame-ancestors 'none'", "upgrade-insecure-requests"].join("; ");
+
+export function injectCsp(html: string, policy = META_CSP): string {
+  const meta = `<meta http-equiv="Content-Security-Policy" content="${policy}">`;
   if (html.includes('http-equiv="Content-Security-Policy"')) return html;
   return html.replace("</head>", `    ${meta}\n  </head>`);
 }
 
+/**
+ * `/*` is first. Cloudflare keeps every Content-Security-Policy header that
+ * matches, so a later rule has to detach the strict policy with
+ * `! Content-Security-Policy` before it sets the OCR policy. html_handling
+ * auto-trailing-slash answers `/ocr.html` with a 307 to `/ocr`, so the OCR
+ * rules are `/ocr` and `/ocr/*`, not only `/ocr.html`. `/bookmarklet*` drops
+ * Cross-Origin-Opener-Policy and sets unsafe-none so a cross-origin
+ * bookmarklet tab can still see window.opener.
+ */
 export function headersDocument(): string {
   return [
     "/*",
@@ -48,6 +72,18 @@ export function headersDocument(): string {
     "",
     "/assets/*",
     "  Cache-Control: public, max-age=31536000, immutable",
+    "",
+    "/ocr",
+    "  ! Content-Security-Policy",
+    `  Content-Security-Policy: ${OCR_HEADER_CSP}`,
+    "",
+    "/ocr/*",
+    "  ! Content-Security-Policy",
+    `  Content-Security-Policy: ${OCR_HEADER_CSP}`,
+    "",
+    "/bookmarklet*",
+    "  ! Cross-Origin-Opener-Policy",
+    "  Cross-Origin-Opener-Policy: unsafe-none",
     "",
   ].join("\n");
 }
