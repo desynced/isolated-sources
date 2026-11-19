@@ -130,6 +130,17 @@ export function page404(): string {
     <h1>This page is not here.</h1>
     <p><a href="/">Back to Isolated Sources</a></p>
   </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="memory-note">The mapping is held in memory for this tab. Clear session drops it.</p>
+      <ul class="footer-links">
+        <li>Open source, MIT.</li>
+        <li><a href="/LICENSE">MIT License</a></li>
+        <li><a href="/NOTICE">License notices</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+      </ul>
+    </div>
+  </footer>
 </body>
 </html>
 `;

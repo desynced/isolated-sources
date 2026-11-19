@@ -37,6 +37,12 @@ describe("content security policy", () => {
     const home = applyHeaders(headers, "/");
     expect(home.get("content-security-policy")).toEqual([HEADER_CSP]);
     expect(home.get("cross-origin-opener-policy")).toEqual(["same-origin"]);
+    for (const path of ["/privacy", "/privacy/", "/privacy.html"]) {
+      const page = applyHeaders(headers, path);
+      expect(page.get("content-security-policy")).toEqual([HEADER_CSP]);
+      expect(page.get("cross-origin-opener-policy")).toEqual(["same-origin"]);
+    }
+    expect(headers.split("\n").filter((line) => /^\s*Content-Security-Policy:/.test(line))).toHaveLength(3);
 
     for (const path of ["/ocr", "/ocr/", "/ocr/worker.min.js"]) {
       const ocr = applyHeaders(headers, path);

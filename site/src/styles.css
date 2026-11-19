@@ -85,6 +85,15 @@ body {
   letter-spacing: 0.01em;
 }
 
+.brand .mark + a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand .mark + a:hover {
+  text-decoration: underline;
+}
+
 .mark {
   display: block;
   flex: 0 0 auto;
@@ -521,6 +530,15 @@ input[type="file"] {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;
+}
+
+.reading {
+  padding-top: 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.reading h2 {
+  margin-top: 1.75rem;
 }
 
 .site-footer {

@@ -75,6 +75,7 @@ export default defineConfig({
         bookmarklet: join(root, "bookmarklet.html"),
         scrubSelection: join(root, "scrub-selection.html"),
         ocr: join(root, "ocr.html"),
+        privacy: join(root, "privacy.html"),
       },
     },
   },

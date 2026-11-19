@@ -25,6 +25,7 @@ describe("site privacy boundaries", () => {
       ...textFiles(join(root, "site", "src")),
       ...textFiles(join(root, "site", "public")),
       join(root, "site", "index.html"),
+      join(root, "site", "privacy.html"),
       join(root, "site", "vite.config.ts"),
       join(root, "README.md"),
       join(root, "wrangler.jsonc"),
