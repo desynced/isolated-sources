@@ -94,12 +94,14 @@ export function headersDocument(): string {
   ].join("\n");
 }
 
-const MARK = `<svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
-          <rect width="32" height="32" rx="7" fill="#0e3b38"/>
-          <rect x="8" y="6" width="16" height="20" rx="2" fill="#f7f4ee"/>
-          <rect x="11" y="10" width="10" height="2" fill="#0e3b38"/>
-          <rect x="11" y="15" width="7" height="2" fill="#c9a227"/>
-          <rect x="11" y="20" width="10" height="2" fill="#0e3b38"/>
+const MARK = `<svg class="mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <rect x="0" y="0" width="2" height="16" fill="#1c2433"/>
+          <rect x="0" y="0" width="4" height="2" fill="#1c2433"/>
+          <rect x="0" y="14" width="4" height="2" fill="#1c2433"/>
+          <rect x="14" y="0" width="2" height="16" fill="#1c2433"/>
+          <rect x="12" y="0" width="4" height="2" fill="#1c2433"/>
+          <rect x="12" y="14" width="4" height="2" fill="#1c2433"/>
+          <rect x="3" y="3" width="10" height="10" fill="#c98a2b"/>
         </svg>`;
 
 export function page404(): string {
