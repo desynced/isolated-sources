@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "../src/app.js";
 import { PAYPAL_ME_URL } from "../src/config.js";
+import { mountHidden } from "../src/hidden-panel.js";
 import { mountMetadata } from "../src/metadata-panel.js";
 import { PROMPT_GENERAL, PROMPT_LEGAL } from "../src/prompts.js";
 import { applyTipLink } from "../src/tip.js";
@@ -30,6 +31,7 @@ function load(): void {
   document.body.innerHTML = body.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
   mount(document);
   mountMetadata(document);
+  mountHidden(document);
 }
 
 function hidden(id: string): boolean {

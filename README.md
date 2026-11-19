@@ -38,8 +38,6 @@ Run `npm install`, then `npm run dev:site`, and open the local URL Vite prints.
 
 ## Soon
 
-- A saveable redaction receipt, with an optional LightDrawer fingerprint of what this tab replaced. The receipt is a record of that session. You must review it before you rely on it.
-- Hidden-content checks for text a file can still carry where you might not see it.
 - Verified PDF redaction: flatten or rasterize redacted pages and check that no text layer remains under the redactions. The check looks at the file you produce. It is not a security guarantee, and you still have to review the result before you rely on it.
 
 ### Later

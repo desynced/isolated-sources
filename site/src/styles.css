@@ -403,7 +403,22 @@ input[type="file"] {
   min-height: 44px;
 }
 
-#metadata-tool {
+.check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-weight: 600;
+  margin-top: 0.8rem;
+}
+
+.check input {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--teal);
+}
+
+#metadata-tool,
+#hidden-tool {
   margin-top: 1.5rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--line);

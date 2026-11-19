@@ -1,24 +1,10 @@
+import { downloadBytes } from "./download.js";
 import type { StripResult } from "./metadata/types.js";
 
 function required<T extends HTMLElement>(doc: Document, id: string): T {
   const el = doc.getElementById(id);
   if (!(el instanceof HTMLElement)) throw new Error(`Missing #${id}`);
   return el as T;
-}
-
-function saveBytes(doc: Document, bytes: Uint8Array, name: string, type: string): void {
-  const copy = new ArrayBuffer(bytes.byteLength);
-  new Uint8Array(copy).set(bytes);
-  const blob = new Blob([copy], { type });
-  const url = URL.createObjectURL(blob);
-  const link = doc.createElement("a");
-  link.href = url;
-  link.download = name;
-  link.hidden = true;
-  doc.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
 export function mountMetadata(doc: Document): void {
@@ -108,7 +94,7 @@ export function mountMetadata(doc: Document): void {
 
   download.addEventListener("click", () => {
     if (!cleaned) return;
-    saveBytes(doc, cleaned.cleaned, cleaned.downloadName, cleaned.mediaType);
+    downloadBytes(doc, cleaned.cleaned, cleaned.downloadName, cleaned.mediaType);
     status.textContent = `Downloaded ${cleaned.downloadName}. You must review it before you share it.`;
   });
 
