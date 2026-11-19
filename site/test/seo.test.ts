@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { page404 } from "../src/csp.js";
 import { PAGE_DESCRIPTION, PAGE_TITLE } from "../src/meta.js";
+
+const BRACKET_MARK = '<svg class="mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">';
 
 function pngSize(bytes: Buffer): { width: number; height: number } {
   expect(bytes.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
@@ -53,6 +56,25 @@ describe("search and icons", () => {
     const ico = readFileSync(new URL("../public/favicon.ico", import.meta.url));
     expect(ico.readUInt16LE(0)).toBe(0);
     expect(ico.readUInt16LE(2)).toBe(1);
-    expect(ico.readUInt16LE(4)).toBeGreaterThan(0);
+    expect(ico.readUInt16LE(4)).toBe(3);
+    expect([ico[6], ico[22], ico[38]]).toEqual([16, 32, 48]);
+  });
+
+  it("draws the bracket mark in the favicon and beside every wordmark", () => {
+    const svg = readFileSync(new URL("../public/favicon.svg", import.meta.url), "utf8");
+    expect(svg).toContain('viewBox="0 0 16 16"');
+    expect(svg).toContain('fill="#1c2433"');
+    expect(svg).toContain('fill="#c98a2b"');
+    expect(svg).not.toContain("#0e3b38");
+    for (const name of ["index.html", "privacy.html", "ocr.html", "bookmarklet.html", "scrub-selection.html"]) {
+      const html = readFileSync(new URL(`../${name}`, import.meta.url), "utf8");
+      expect(html, name).toContain(BRACKET_MARK);
+      expect(html, name).toContain('fill="#c98a2b"');
+      expect(html, name).not.toContain('style=');
+    }
+    const missing = page404();
+    expect(missing).toContain(BRACKET_MARK);
+    expect(missing).toContain('fill="#c98a2b"');
+    expect(missing).not.toContain('style=');
   });
 });
