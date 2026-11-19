@@ -1,9 +1,11 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
+
+const TEXT = new Set([".ts", ".tsx", ".js", ".css", ".html", ".svg", ".txt", ".xml", ".json", ".jsonc", ".md"]);
 
 function filesIn(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -13,11 +15,15 @@ function filesIn(dir: string): string[] {
   });
 }
 
+function textFiles(dir: string): string[] {
+  return filesIn(dir).filter((path) => TEXT.has(extname(path).toLowerCase()));
+}
+
 describe("site privacy boundaries", () => {
   it("does not call the network, store data, or use forbidden claims", () => {
     const paths = [
-      ...filesIn(join(root, "site", "src")),
-      ...filesIn(join(root, "site", "public")),
+      ...textFiles(join(root, "site", "src")),
+      ...textFiles(join(root, "site", "public")),
       join(root, "site", "index.html"),
       join(root, "site", "vite.config.ts"),
       join(root, "README.md"),
@@ -42,6 +48,22 @@ describe("site privacy boundaries", () => {
 
     const wrangler = readFileSync(join(root, "wrangler.jsonc"), "utf8");
     expect(wrangler).toContain('"./site/dist"');
-    expect(wrangler).not.toMatch(/"main"\s*:/);
+    expect(wrangler).toContain('"./worker/index.ts"');
+    expect(wrangler).toContain('"run_worker_first": true');
+    expect(wrangler).not.toMatch(/"d1_databases"|"kv_namespaces"|"r2_buckets"|"analytics_engine_datasets"/);
+
+    const worker = textFiles(join(root, "worker"))
+      .filter((path) => !path.endsWith(".test.ts"))
+      .map((path) => readFileSync(path, "utf8"))
+      .join("\n");
+    const stripped = worker
+      .replaceAll("assets.fetch(request)", "")
+      .replaceAll("async fetch(request: Request, env: Env)", "")
+      .replaceAll("fetch(request: Request)", "");
+    expect(stripped).not.toMatch(/fetch\s*\(/);
+    expect(worker).toMatch(/assets\.fetch\(request\)/);
+    expect(worker).not.toMatch(/request\.(text|json|formData|arrayBuffer|blob)\s*\(/);
+    expect(worker).not.toMatch(/\bconsole\./);
+    expect(worker).not.toMatch(/\blocalStorage\b|\bsessionStorage\b|\bindexedDB\b|\bXMLHttpRequest\b|\bWebSocket\b|\bsendBeacon\b/);
   });
 });

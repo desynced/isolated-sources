@@ -2,7 +2,7 @@
 
 Isolated Sources finds common identifiers in text and replaces them with stable placeholders such as `[PERSON_1]` and `[CASE_1]`. The same value always gets the same placeholder inside a session. You get the mapping back, and each hit includes the recognizer, its score, and the surrounding text so a review panel can show why it was flagged.
 
-It runs in your browser. Nothing leaves your device. There is no server code and the library makes no network calls.
+It runs in your browser. Nothing leaves your device. The library makes no network calls. The public Worker only redirects http to https and www to the apex; it does not read a request body.
 
 It helps identify and replace common identifiers: contact details, account and government numbers, dates of birth when a birth cue is present, US street addresses, and a few legal labels (case, docket, Bates, and matter numbers, plus names after cues such as "Judge" or "v."). A list of known parties is always matched, including light variants such as "Mr. Doe". A name-model interface is included for a later in-browser model; the built-in stub finds no names on its own and does not download one.
 
@@ -10,7 +10,7 @@ It is not guaranteed to be complete. You must review the result, including anyth
 
 Given model output and the mapping, `restore` swaps exact placeholders back and reports any placeholder that is missing or altered. It does not guess.
 
-Pattern recognizers for common identifiers are ported from [Microsoft Presidio](https://github.com/microsoft/presidio) (MIT). See `NOTICE`.
+Pattern recognizers for common identifiers are ported from [Microsoft Presidio](https://github.com/data-privacy-stack/presidio) (MIT). See `NOTICE`.
 
 ```ts
 import { restore, scrub } from "isolated-sources";
@@ -30,13 +30,20 @@ The public page lives in `site/`. It scrubs and restores with this package in th
 
 Run `npm install`, then `npm run dev:site`, and open the local URL Vite prints.
 
-`npm run build:site` typechecks the page and writes the static files to `site/dist`. A Cloudflare Workers static-assets deploy can serve that folder (`wrangler.jsonc` points at it). `npm test` includes the site flow.
+`npm run build:site` typechecks the page and writes the static files to `site/dist`. `wrangler.jsonc` serves that folder behind a redirect-only Worker: http to https, and www to the apex, keeping the path and query. `npm test` includes the site flow.
 
-## Roadmap
+## Next
 
-### Soon
+- Before/after compare, so a review can show the original span beside its placeholder.
+- Prompt starters that keep placeholders intact, so a model is asked not to rewrite tokens such as `[PERSON_1]`.
+- Metadata stripping for Word, PDF, and photos, removing properties that can carry names or locations. You must review the file you produce before you rely on it.
+- A journalist use case: notes and source names, with the known-party list, walked through on the page.
 
-Verified PDF redaction: flatten or rasterize redacted pages and check that no text layer remains under the redactions. The check looks at the file you produce. It is not a security guarantee, and you still have to review the result before you rely on it.
+## Soon
+
+- A saveable redaction receipt, with an optional LightDrawer fingerprint of what this tab replaced. The receipt is a record of that session. You must review it before you rely on it.
+- Hidden-content checks for text a file can still carry where you might not see it.
+- Verified PDF redaction: flatten or rasterize redacted pages and check that no text layer remains under the redactions. The check looks at the file you produce. It is not a security guarantee, and you still have to review the result before you rely on it.
 
 ## License
 

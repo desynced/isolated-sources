@@ -19,4 +19,12 @@ jobs:
       - run: npm run build:site
       - run: grep -q "connect-src 'none'" site/dist/index.html
       - run: grep -q "frame-ancestors 'none'" site/dist/_headers
+      - run: |
+          grep -q "Strict-Transport-Security: max-age=31536000; includeSubDomains" site/dist/_headers
+      - run: |
+          grep -q "User-agent: *" site/dist/robots.txt
+      - run: |
+          grep -q "Sitemap: https://isolatedsources.com/sitemap.xml" site/dist/robots.txt
+      - run: |
+          grep -q "Content-Signal: search=yes, ai-input=no, ai-train=no" site/dist/robots.txt
       - run: if grep -q "unsafe-inline" site/dist/index.html; then exit 1; fi

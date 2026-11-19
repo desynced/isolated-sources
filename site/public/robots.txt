@@ -1,0 +1,9 @@
+# Preferences for crawlers that honor Content-Signal.
+# search is welcome. ai-input and ai-train are not.
+# This is a preference, not an access control.
+
+User-agent: *
+Allow: /
+Content-Signal: search=yes, ai-input=no, ai-train=no
+
+Sitemap: https://isolatedsources.com/sitemap.xml

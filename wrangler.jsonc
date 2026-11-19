@@ -1,10 +1,15 @@
 {
-  // Assets only. There is no Worker script, so this app cannot receive or log the text.
+  // Redirects only. The worker does not read or log request bodies.
+  // Scrubbing stays in the browser. Static files are served from site/dist.
+  // run_worker_first lets the redirect see requests that would otherwise match an asset.
   "name": "isolated-sources",
   "compatibility_date": "2026-11-18",
+  "main": "./worker/index.ts",
   "assets": {
     "directory": "./site/dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "html_handling": "auto-trailing-slash"
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": true
   }
 }

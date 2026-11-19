@@ -17,9 +17,9 @@ const TEXT = `Alex Rivera emailed jordan.quinn@example.com about Case No. 1:24-c
 Associate Pat Exampleton appeared. Reference 4155550199 in the index.`;
 
 const HERO = [
-  "Light and private. Pure JavaScript, no model downloads, no servers. Your text never leaves your device.",
-  "Built for legal text. Catches case, docket, Bates and matter numbers, plus names from your own party list.",
-  "Restores exactly, or tells you why it can't. Paste the AI's answer back and every placeholder returns as it was. If one is missing or altered, it shows you which, and never guesses.",
+  "Light core. No model download and no servers. Your text stays in this browser.",
+  "Legal patterns built in: case, docket, Bates, and matter numbers, Judge, Plaintiff, and 'v.' cues, and a known-party list.",
+  "Exact-only restore. It reports missing or altered placeholders instead of guessing.",
 ];
 
 function load(): void {
@@ -75,7 +75,10 @@ describe("site page", () => {
   });
 
   it("shows the homepage copy, footer, labels, and the configured tip link", () => {
-    expect(document.querySelector("h1")?.textContent).toBe("Free PII scrubbing that stays in your browser.");
+    expect(document.querySelector("h1")?.textContent).toBe(
+      "Free scrubbing for personally identifiable information, in your browser.",
+    );
+    expect(document.body.textContent).not.toMatch(/\bPII\b/);
     expect([...document.querySelectorAll(".hero-points li")].map((item) => item.textContent)).toEqual(HERO);
     expect(document.getElementById("footnote")?.textContent).toBe(
       "Helps identify and replace common identifiers. You must review before sharing.",
@@ -88,6 +91,21 @@ describe("site page", () => {
     );
     expect(document.querySelector('a[href*="LICENSE"]')?.textContent).toContain("MIT License");
     expect(document.body.textContent).toContain("Microsoft Presidio");
+    expect(document.querySelector('a[href="https://github.com/data-privacy-stack/presidio"]')).not.toBeNull();
+    expect(document.getElementById("parties-hint")?.textContent).toContain("always replaced");
+    expect(document.getElementById("parties-hint")?.textContent).toContain("Mr. Doe");
+    expect(document.getElementById("parties-hint")?.textContent).toContain("at least three letters");
+    expect(document.getElementById("restore-prep")?.textContent).toBe(
+      "Copy the scrubbed text, paste it into your AI, then come back and paste the answer to restore.",
+    );
+    expect(hidden("clear-session")).toBe(true);
+    const who = document.getElementById("who-for")?.textContent ?? "";
+    for (const label of ["Attorneys", "Journalists", "Freelancers and contractors", "Researchers"]) {
+      expect(who).toContain(label);
+    }
+    expect(who.toLowerCase()).not.toMatch(/patient|clinic|hospital|hipaa|medical/);
+    expect(document.getElementById("self-test-note")?.textContent).toContain("connect-src 'none'");
+    expect(document.getElementById("self-test-note")?.textContent).toContain("does not detect airplane mode");
     expect(hidden("tip-item")).toBe(true);
     const tip = document.getElementById("tip-link");
     const tipItem = document.getElementById("tip-item");
@@ -221,7 +239,9 @@ describe("site page", () => {
     expect(document.getElementById("restore-summary")?.textContent).toMatch(/not guessed/i);
     expect(document.getElementById("missing-section")?.classList.contains("is-problem")).toBe(true);
 
+    expect(hidden("clear-session")).toBe(false);
     button("clear-session").click();
+    expect(hidden("clear-session")).toBe(true);
     expect(hidden("step-paste")).toBe(false);
     expect(area("source-text").value).toBe("");
     expect(area("known-parties").value).toBe("");
@@ -239,5 +259,88 @@ describe("site page", () => {
       expect(dumped).not.toContain("jordan.quinn@example.com");
       expect(dumped).not.toContain("Alex Rivera");
     }
+  });
+
+  it("runs the sample through scrub, review, restore, and the missing-placeholder report", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    button("try-sample").click();
+    await vi.waitFor(() => {
+      expect(hidden("step-review")).toBe(false);
+    });
+
+    expect(area("source-text").value).toContain("Judge Mina Cho");
+    expect(area("source-text").value).toContain("Plaintiff");
+    expect(area("source-text").value).toContain("v.");
+    expect(area("source-text").value).toContain("Bates");
+    expect(area("source-text").value).toContain("Matter No.");
+    expect(area("known-parties").value).toContain("Jordan Quinn");
+
+    const view = document.getElementById("scrubbed-view")?.textContent ?? "";
+    expect(view).not.toContain("jordan.quinn@example.com");
+    expect(view).not.toContain("Jordan Quinn");
+    expect(view).not.toContain("Alex Rivera");
+    expect(view).not.toContain("1:24-cv-04567");
+    expect(view).not.toContain("ABC-000100");
+    expect(view).toContain("Judge ");
+    expect(view).toContain("Plaintiff");
+    expect(view).toContain("v.");
+    expect(document.getElementById("sample-note")?.hidden).toBe(false);
+
+    button("continue-restore").click();
+    expect(hidden("step-restore")).toBe(false);
+    const answer = area("ai-answer").value;
+    expect(answer).not.toBe("");
+    const tokens = [
+      ...new Set(
+        [...document.querySelectorAll("#findings mark")].map((mark) => mark.textContent ?? "").filter(Boolean),
+      ),
+    ];
+    const altered = tokens.filter((token) => answer.includes(token.toLowerCase()) && !answer.includes(token));
+    expect(altered).toHaveLength(1);
+    const missingToken = tokens.find((token) => !answer.includes(token) && !answer.includes(token.toLowerCase()));
+    expect(missingToken).toBeTruthy();
+
+    button("restore-button").click();
+    expect(document.getElementById("missing-list")?.textContent).toContain(missingToken ?? "");
+    expect(document.getElementById("missing-list")?.textContent).toContain("stood for");
+    expect(document.getElementById("altered-list")?.textContent).toContain(altered[0]?.toLowerCase() ?? "");
+    expect(document.getElementById("restore-summary")?.textContent).toMatch(/not guessed/i);
+    const stood = /stood for (.+) in the scrubbed text/.exec(document.getElementById("missing-list")?.textContent ?? "");
+    expect(stood?.[1]).toBeTruthy();
+    expect(document.getElementById("restored-view")?.textContent ?? "").not.toContain(stood?.[1] ?? "missing-surface");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("runs the airplane-mode self-test without a network request or a session", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    vi.spyOn(performance, "getEntriesByType").mockReturnValue([]);
+    class QuietObserver {
+      observe(): void {}
+      disconnect(): void {}
+      takeRecords(): PerformanceEntry[] {
+        return [];
+      }
+    }
+    vi.stubGlobal("PerformanceObserver", QuietObserver);
+
+    area("source-text").value = "keep this text";
+    button("self-test-button").click();
+    await vi.waitFor(() => {
+      expect(document.getElementById("self-test-result")?.textContent).toMatch(/Resource timing recorded 0/);
+    });
+
+    const result = document.getElementById("self-test-result")?.textContent ?? "";
+    expect(result).toContain("connect-src 'none'");
+    expect(result).toContain("does not detect airplane mode");
+    expect(result).toContain("does not cover extensions");
+    expect(result.toLowerCase()).not.toMatch(/guaranteed|certified|compliant/);
+    expect(result).not.toContain("jordan.quinn@example.com");
+    expect(area("source-text").value).toBe("keep this text");
+    expect(hidden("step-paste")).toBe(false);
+    expect(hidden("clear-session")).toBe(true);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

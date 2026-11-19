@@ -166,6 +166,10 @@ h3 {
   font-weight: 600;
 }
 
+.status {
+  margin: 0;
+}
+
 .status:not(:empty) {
   min-height: 1.5em;
   margin: 0.75rem 0 0;
@@ -374,6 +378,37 @@ mark.placeholder {
   padding: 0.75rem 1rem;
 }
 
+.who {
+  margin-top: 0.5rem;
+}
+
+.who ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.who li {
+  margin: 0.15rem 0;
+}
+
+.self-test {
+  margin: 1.25rem 0 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+#self-test-result:empty {
+  margin: 0;
+}
+
+#self-test-result:not(:empty) {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
 .site-footer {
   border-top: 1px solid var(--line);
   background: #fff;
@@ -410,6 +445,75 @@ a {
 ::selection {
   background: #c9ddff;
   color: var(--ink);
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    width: min(42rem, calc(100% - 1.25rem));
+  }
+
+  .bar {
+    min-height: 0;
+    padding: 0.35rem 0;
+  }
+
+  .brand {
+    font-size: 0.95rem;
+  }
+
+  .mark {
+    width: 22px;
+    height: 22px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .hero {
+    margin: 0.1rem 0 0.35rem;
+  }
+
+  .hero-points {
+    margin: 0.05rem 0 0.25rem;
+  }
+
+  .hero-points li {
+    margin: 0.12rem 0;
+    font-size: 0.88rem;
+    line-height: 1.28;
+  }
+
+  .footnote,
+  .hint {
+    font-size: 0.82rem;
+  }
+
+  .progress {
+    margin: 0.25rem 0 0;
+  }
+
+  .progress li {
+    padding: 0.18rem 0.1rem;
+  }
+
+  .status:not(:empty) {
+    margin-top: 0.35rem;
+  }
+
+  #step-paste h2 {
+    font-size: 1.1rem;
+    margin: 0.15rem 0 0.2rem;
+  }
+
+  #step-paste .field {
+    margin: 0.4rem 0;
+  }
+
+  #step-paste label {
+    margin-bottom: 0.15rem;
+  }
 }
 
 @media (max-width: 640px) {
