@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bookmarklet — Isolated Sources</title>
+  <meta name="description" content="Scrub selected text from another page. It does not send the text to a server.">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#f7f4ee">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap bar">
+      <p class="brand"><a href="/">Isolated Sources</a></p>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <h1>Bookmarklet</h1>
+    <p id="bookmarklet-caveat">This runs on other websites. Isolated Sources' security policy and airplane-mode self-test do not apply there. It does not send the text to a server.</p>
+    <p>Drag the link to your bookmarks bar. On another page, select text and open the bookmark. It reads that selection and hands it to a tab on this site. The text is scrubbed in that tab. It is not uploaded.</p>
+    <p><a id="bookmarklet-link" href="/">Scrub selection</a></p>
+    <h2>Bookmarklet source</h2>
+    <p class="hint">You can read the whole thing. It only reads the selection and passes it to this site in the browser.</p>
+    <pre id="bookmarklet-source" class="text-out"></pre>
+    <p id="bookmarklet-waiting" hidden>Waiting for the selected text from the other page.</p>
+    <div id="bookmarklet-result" hidden>
+      <h2>Scrubbed selection</h2>
+      <p id="bookmarklet-status" role="status"></p>
+      <pre id="bookmarklet-output" class="text-out" translate="no"></pre>
+      <button type="button" id="bookmarklet-copy">Copy scrubbed text</button>
+      <p class="footnote">Helps identify and replace common identifiers. You must review before sharing.</p>
+    </div>
+  </main>
+  <script type="module" src="/src/bookmarklet-page.ts"></script>
+</body>
+</html>

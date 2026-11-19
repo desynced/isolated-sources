@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Optional OCR — Isolated Sources</title>
+  <meta name="description" content="Optional English OCR. The engine loads from this site only after you ask.">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#f7f4ee">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap bar">
+      <p class="brand"><a href="/">Isolated Sources</a></p>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <h1>Optional OCR</h1>
+    <p>This page is separate from the main scrubber. OCR is off until you ask for it. The download is the engine and the English language data, and it comes from this site only. The airplane-mode self-test covers the main page. It does not cover these extra files, because this page loads them from isolatedsources.com itself after you click the button.</p>
+    <p>Nothing on this page is a model chat. It only reads text out of a picture. You must review that text before you rely on it.</p>
+    <button type="button" id="ocr-download">Download OCR (about 7 MB)</button>
+    <p id="ocr-status" role="status"></p>
+    <p id="ocr-error" class="alert" role="alert" tabindex="-1"></p>
+    <div id="ocr-work" hidden>
+      <div class="field">
+        <label for="ocr-file">Image or PDF</label>
+        <input id="ocr-file" type="file" accept=".png,.jpg,.jpeg,.pdf,image/png,image/jpeg,application/pdf">
+      </div>
+      <h2>Text that was read</h2>
+      <pre id="ocr-text" class="text-out" translate="no"></pre>
+    </div>
+    <p class="hint">English only. A PDF is read only when an embedded JPEG can be pulled out. This page does not render the page, and it does not remove text you can see. You must review the result.</p>
+  </main>
+  <script type="module" src="/src/ocr-page.ts"></script>
+</body>
+</html>

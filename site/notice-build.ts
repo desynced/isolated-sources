@@ -29,13 +29,14 @@ const PDF_LIB_NOTICE = [
  * Notice file shipped in the static build. Drops forge URLs so the public
  * files do not name a code host. The MIT text itself is kept.
  */
-export function publicNotice(source: string): string {
-  const kept = source
+export function publicNotice(source: string, extra = ""): string {
+  const kept = [source, PDF_LIB_NOTICE, extra]
+    .join("\n")
     .split(/\r?\n/)
     .filter((line) => !line.toLowerCase().includes("github.com"))
     .join("\n")
-    .trimEnd();
-  const notice = `${kept}\n\n${PDF_LIB_NOTICE}\n`;
+    .trim();
+  const notice = `${kept}\n`;
   if (notice.toLowerCase().includes("github.com")) {
     throw new Error("Public notice still names a code host.");
   }

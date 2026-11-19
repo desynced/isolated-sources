@@ -77,8 +77,11 @@ describe("airplane-mode self-test", () => {
     const main = readFileSync(join(here, "../src/main.ts"), "utf8");
     const app = readFileSync(join(here, "../src/app.ts"), "utf8");
     const panel = readFileSync(join(here, "../src/metadata-panel.ts"), "utf8");
+    const ocrPage = readFileSync(join(here, "../src/ocr-page.ts"), "utf8");
     expect(main + app).not.toContain("metadata/strip");
+    expect(main + app).not.toContain("ocr/run");
     expect(panel).toContain('import("./metadata/strip.js")');
+    expect(ocrPage).toContain('import("./ocr/run.js")');
     expect(panel).not.toMatch(/\bfetch\s*\(/);
     expect(panel).not.toMatch(/\bXMLHttpRequest\b/);
     expect(panel).not.toMatch(/\bWebSocket\b/);
