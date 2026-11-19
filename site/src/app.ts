@@ -1,4 +1,7 @@
 import { restore, type Finding, type ResidualFinding, type RestoreResult } from "../../src/index.js";
+import { PAGE_TITLE } from "./meta.js";
+import { SAMPLE_PARTIES, SAMPLE_TEXT, buildSampleAnswer } from "./sample.js";
+import { runSelfTest, selfTestMessage } from "./self-test.js";
 import {
   addResidual,
   addSpan,
@@ -55,9 +58,44 @@ export function mount(doc: Document): void {
   const alteredSection = required<HTMLElement>("altered-section");
   const alteredLead = required<HTMLElement>("altered-lead");
   const alteredList = required<HTMLElement>("altered-list");
+  const clearButton = required<HTMLButtonElement>("clear-session");
+  const trySampleButton = required<HTMLButtonElement>("try-sample");
+  const sampleNote = required<HTMLElement>("sample-note");
+  const selfTestButton = required<HTMLButtonElement>("self-test-button");
+  const selfTestResult = required<HTMLElement>("self-test-result");
 
   let state: ScrubState | null = null;
   let pending: PendingRange | null = null;
+  let sampleOn = false;
+  let stagedAnswer = "";
+
+  const setSession = (next: ScrubState | null): void => {
+    state = next;
+    clearButton.hidden = next === null;
+  };
+
+  const syncSample = (): void => {
+    if (!sampleOn || !state) {
+      stagedAnswer = "";
+      sampleNote.hidden = true;
+      sampleNote.textContent = "";
+      return;
+    }
+    const built = buildSampleAnswer(state.scrubbed, state.mapping);
+    if (!built) {
+      stagedAnswer = "";
+      sampleNote.hidden = false;
+      sampleNote.textContent =
+        "This sample needs two placeholders before the sample answer can drop one and alter another.";
+      return;
+    }
+    stagedAnswer = built.answer;
+    sampleNote.hidden = false;
+    sampleNote.textContent =
+      "Sample loaded. Continue to restore fills a sample answer that drops one placeholder and alters another. You must review before you rely on it.";
+  };
+
+  setSession(null);
 
   for (const kind of KINDS) {
     const option = doc.createElement("option");
@@ -86,7 +124,7 @@ export function mount(doc: Document): void {
     reviewStep.hidden = step !== "review";
     restoreStep.hidden = step !== "restore";
     const titles: Record<Step, string> = {
-      paste: "Isolated Sources",
+      paste: PAGE_TITLE,
       review: "Review — Isolated Sources",
       restore: "Restore — Isolated Sources",
     };
@@ -352,35 +390,53 @@ export function mount(doc: Document): void {
     restoreError.textContent = "";
   };
 
-  pasteForm.addEventListener("submit", (event) => {
-    event.preventDefault();
+  const scrubFrom = (text: string, partyText: string, sample: boolean): void => {
     void (async () => {
       pasteError.textContent = "";
-      const text = source.value;
       if (text.trim() === "") {
         pasteError.textContent = "Paste text before scrubbing.";
         source.focus();
         return;
       }
       scrubButton.disabled = true;
-      announce("Scrubbing.");
+      trySampleButton.disabled = true;
+      announce(sample ? "Loading the sample." : "Scrubbing.");
       try {
         await new Promise((resolve) => setTimeout(resolve, 0));
-        state = await runScrub(text, parseParties(parties.value));
+        const next = await runScrub(text, parseParties(partyText));
+        setSession(next);
         pending = null;
-        missed.value = state.source;
+        missed.value = next.source;
+        sampleOn = sample;
+        syncSample();
         renderReview();
         showStep("review");
-        const count = state.findings.length;
-        announce(`Scrubbed. ${count} finding${count === 1 ? "" : "s"}. Review them before you copy.`);
+        const count = next.findings.length;
+        announce(
+          sample
+            ? `Sample loaded. ${count} finding${count === 1 ? "" : "s"}. Review them, then continue to restore.`
+            : `Scrubbed. ${count} finding${count === 1 ? "" : "s"}. Review them before you copy.`,
+        );
         focusHeading("review-heading");
       } catch (error) {
         pasteError.textContent = error instanceof Error ? error.message : "Scrubbing failed.";
         pasteError.focus();
       } finally {
         scrubButton.disabled = false;
+        trySampleButton.disabled = false;
       }
     })();
+  };
+
+  pasteForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    scrubFrom(source.value, parties.value, false);
+  });
+
+  trySampleButton.addEventListener("click", () => {
+    source.value = SAMPLE_TEXT;
+    parties.value = SAMPLE_PARTIES;
+    scrubFrom(SAMPLE_TEXT, SAMPLE_PARTIES, true);
   });
 
   findings.addEventListener("click", (event) => {
@@ -390,7 +446,8 @@ export function mount(doc: Document): void {
     const end = Number(button.dataset.end);
     const previous = state.findings.find((item) => item.start === start && item.end === end);
     void unflag(state, start, end).then((next) => {
-      state = next;
+      setSession(next);
+      syncSample();
       renderReview();
       announce(previous ? `Un-flagged ${previous.placeholder}.` : "Un-flagged.");
       focusHeading("findings-heading");
@@ -410,7 +467,8 @@ export function mount(doc: Document): void {
         flagError.focus();
         return;
       }
-      state = result.state;
+      setSession(result.state);
+      syncSample();
       flagError.textContent = "";
       renderReview();
       announce(`Flagged ${item.text}.`);
@@ -462,7 +520,8 @@ export function mount(doc: Document): void {
         flagError.focus();
         return;
       }
-      state = result.state;
+      setSession(result.state);
+      syncSample();
       pending = null;
       flagError.textContent = "";
       renderReview();
@@ -481,7 +540,9 @@ export function mount(doc: Document): void {
   });
 
   required<HTMLButtonElement>("edit-text").addEventListener("click", () => {
-    state = null;
+    setSession(null);
+    sampleOn = false;
+    syncSample();
     pending = null;
     clearOutputs();
     showStep("paste");
@@ -491,8 +552,9 @@ export function mount(doc: Document): void {
 
   required<HTMLButtonElement>("continue-restore").addEventListener("click", () => {
     if (!state) return;
+    if (sampleOn && stagedAnswer !== "") aiAnswer.value = stagedAnswer;
     showStep("restore");
-    announce("Paste the AI answer, then restore.");
+    announce(sampleOn ? "Sample answer filled. Restore it to see the report." : "Paste the AI answer, then restore.");
     focusHeading("restore-heading");
   });
 
@@ -529,8 +591,10 @@ export function mount(doc: Document): void {
     focusHeading("restore-result-heading");
   });
 
-  required<HTMLButtonElement>("clear-session").addEventListener("click", () => {
-    state = null;
+  clearButton.addEventListener("click", () => {
+    setSession(null);
+    sampleOn = false;
+    syncSample();
     pending = null;
     source.value = "";
     parties.value = "";
@@ -540,6 +604,24 @@ export function mount(doc: Document): void {
     showStep("paste");
     announce("Session cleared. The text and mapping are gone from this tab.");
     source.focus();
+  });
+
+  selfTestButton.addEventListener("click", () => {
+    void (async () => {
+      selfTestButton.disabled = true;
+      selfTestResult.textContent = "Running scrub and restore on the sample.";
+      try {
+        const report = await runSelfTest();
+        selfTestResult.textContent = selfTestMessage(report);
+        announce("Self-test finished.");
+      } catch {
+        selfTestResult.textContent =
+          "The self-test could not finish, so it cannot report a request count. connect-src 'none' tells the browser to block connections from the page. This does not detect airplane mode.";
+        announce("Self-test could not finish.");
+      } finally {
+        selfTestButton.disabled = false;
+      }
+    })();
   });
 
   function currentRange(): ViewRead {

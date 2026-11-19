@@ -3,11 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Isolated Sources</title>
-  <meta name="description" content="Free PII scrubbing that stays in your browser.">
+  <title>Isolated Sources — legal patterns and exact restore</title>
+  <meta name="description" content="In-browser scrubbing with legal patterns and exact restore. Case, docket, Bates and matter numbers are replaced. Missing or altered placeholders are reported, not guessed.">
+  <link rel="canonical" href="https://isolatedsources.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Isolated Sources">
+  <meta property="og:title" content="Isolated Sources — legal patterns and exact restore">
+  <meta property="og:description" content="In-browser scrubbing with legal patterns and exact restore. Case, docket, Bates and matter numbers are replaced. Missing or altered placeholders are reported, not guessed.">
+  <meta property="og:url" content="https://isolatedsources.com/">
+  <meta property="og:image" content="https://isolatedsources.com/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Isolated Sources. Legal patterns and exact restore, in your browser.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Isolated Sources — legal patterns and exact restore">
+  <meta name="twitter:description" content="In-browser scrubbing with legal patterns and exact restore. Case, docket, Bates and matter numbers are replaced. Missing or altered placeholders are reported, not guessed.">
+  <meta name="twitter:image" content="https://isolatedsources.com/og.png">
+  <meta name="twitter:image:alt" content="Isolated Sources. Legal patterns and exact restore, in your browser.">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#f7f4ee">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="/src/styles.css">
 </head>
 <body>
@@ -24,7 +42,7 @@
         </svg>
         <span>Isolated Sources</span>
       </p>
-      <button type="button" id="clear-session" class="secondary">Clear session</button>
+      <button type="button" id="clear-session" class="secondary" hidden>Clear session</button>
     </div>
   </header>
   <main id="main" class="wrap">
@@ -40,11 +58,11 @@
 
     <section id="step-paste" class="step">
       <div class="hero">
-        <h1>Free PII scrubbing that stays in your browser.</h1>
+        <h1>Free scrubbing for personally identifiable information, in your browser.</h1>
         <ul class="hero-points">
-          <li>Light and private. Pure JavaScript, no model downloads, no servers. Your text never leaves your device.</li>
-          <li>Built for legal text. Catches case, docket, Bates and matter numbers, plus names from your own party list.</li>
-          <li>Restores exactly, or tells you why it can't. Paste the AI's answer back and every placeholder returns as it was. If one is missing or altered, it shows you which, and never guesses.</li>
+          <li>Light core. No model download and no servers. Your text stays in this browser.</li>
+          <li>Legal patterns built in: case, docket, Bates, and matter numbers, Judge, Plaintiff, and 'v.' cues, and a known-party list.</li>
+          <li>Exact-only restore. It reports missing or altered placeholders instead of guessing.</li>
         </ul>
         <p id="footnote" class="footnote">Helps identify and replace common identifiers. You must review before sharing.</p>
       </div>
@@ -58,11 +76,12 @@
         <div class="field">
           <label for="known-parties">Known parties</label>
           <textarea id="known-parties" rows="4" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" translate="no" aria-describedby="parties-hint"></textarea>
-          <p id="parties-hint" class="hint">Optional. One name per line.</p>
+          <p id="parties-hint" class="hint">Optional. One name per line. Clients, counsel, and sources you list are always replaced. A first-and-last name also matches light variants: any capitalization, an optional middle initial, Last, First, a title plus the surname (Mr. Doe), and the surname alone when it has at least three letters.</p>
         </div>
         <p id="paste-error" class="alert" role="alert" tabindex="-1"></p>
         <div class="actions">
           <button type="submit" id="scrub-button">Scrub</button>
+          <button type="button" id="try-sample" class="secondary">Try a sample</button>
         </div>
       </form>
     </section>
@@ -97,6 +116,8 @@
         <button type="button" id="flag-selection">Flag selected text</button>
       </div>
       <p id="flag-error" class="alert" role="alert" tabindex="-1"></p>
+      <p id="sample-note" class="hint" hidden></p>
+      <p id="restore-prep" class="hint">Copy the scrubbed text, paste it into your AI, then come back and paste the answer to restore.</p>
       <div class="actions">
         <button type="button" id="edit-text" class="secondary">Edit text</button>
         <button type="button" id="continue-restore">Continue to restore</button>
@@ -138,6 +159,24 @@
         <button type="button" id="back-to-review" class="secondary">Back to review</button>
       </div>
     </section>
+
+    <section id="who-for" class="who" aria-labelledby="who-heading">
+      <h2 id="who-heading">Who it's for</h2>
+      <p>People who need identifiers replaced before a draft is pasted into an AI tool.</p>
+      <ul>
+        <li>Attorneys</li>
+        <li>Journalists</li>
+        <li>Freelancers and contractors</li>
+        <li>Researchers</li>
+      </ul>
+    </section>
+
+    <section id="self-test" class="self-test" aria-labelledby="self-test-heading">
+      <h2 id="self-test-heading">Airplane-mode self-test</h2>
+      <p id="self-test-note" class="hint">One click scrubs and restores sample text in this tab, then counts requests with PerformanceObserver and resource timing. This page is built with connect-src 'none', so the browser blocks connections from the page. The count does not detect airplane mode, and it does not cover extensions, other apps, or the rest of the device.</p>
+      <button type="button" id="self-test-button" class="secondary">Run self-test</button>
+      <p id="self-test-result" aria-live="polite"></p>
+    </section>
   </main>
   <footer class="site-footer">
     <div class="wrap">
@@ -145,7 +184,7 @@
       <ul class="footer-links">
         <li><a href="https://github.com/desynced/isolated-sources" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">GitHub<span class="visually-hidden"> (opens in a new tab)</span></a></li>
         <li><a href="https://github.com/desynced/isolated-sources/blob/main/LICENSE" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">MIT License<span class="visually-hidden"> (opens in a new tab)</span></a></li>
-        <li>Recognizers for common identifiers are ported from <a href="https://github.com/microsoft/presidio" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">Microsoft Presidio<span class="visually-hidden"> (opens in a new tab)</span></a>.</li>
+        <li>Recognizers for common identifiers are ported from <a href="https://github.com/data-privacy-stack/presidio" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">Microsoft Presidio<span class="visually-hidden"> (opens in a new tab)</span></a>.</li>
         <li id="tip-item" hidden><a id="tip-link" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">Leave a tip<span class="visually-hidden"> (opens in a new tab)</span></a></li>
       </ul>
     </div>

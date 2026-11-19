@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { HEADER_CSP, META_CSP, headersDocument, injectCsp, page404 } from "../src/csp.js";
+import { HEADER_CSP, META_CSP, STRICT_TRANSPORT_SECURITY, headersDocument, injectCsp, page404 } from "../src/csp.js";
 
 describe("content security policy", () => {
   it("blocks network, inline scripts, and framing on the static build", () => {
@@ -17,6 +17,8 @@ describe("content security policy", () => {
 
     const headers = headersDocument();
     expect(headers).toContain(HEADER_CSP);
+    expect(STRICT_TRANSPORT_SECURITY).toBe("max-age=31536000; includeSubDomains");
+    expect(headers).toContain(`Strict-Transport-Security: ${STRICT_TRANSPORT_SECURITY}`);
     expect(headers).toContain("X-Frame-Options: DENY");
     expect(headers).toContain("X-Content-Type-Options: nosniff");
     expect(headers).toContain("Referrer-Policy: no-referrer");
@@ -30,6 +32,11 @@ describe("content security policy", () => {
     const missing = page404();
     expect(missing).toContain(META_CSP);
     expect(missing).toContain("This page is not here.");
+    expect(missing).toContain('class="site-header"');
+    expect(missing).toContain('class="brand"');
+    expect(missing).toContain("apple-touch-icon");
     expect(missing).not.toContain("unsafe-inline");
+    const css = readFileSync(new URL("../public/404.css", import.meta.url), "utf8");
+    expect(css).toMatch(/font-family:\s*Georgia/);
   });
 });

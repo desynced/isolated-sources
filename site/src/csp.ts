@@ -25,6 +25,9 @@ export const META_CSP = SHARED.join("; ");
 
 export const HEADER_CSP = [...SHARED, "frame-ancestors 'none'", "upgrade-insecure-requests"].join("; ");
 
+/** One year, including subdomains. Browsers honor this only on HTTPS responses. */
+export const STRICT_TRANSPORT_SECURITY = "max-age=31536000; includeSubDomains";
+
 export function injectCsp(html: string): string {
   const meta = `<meta http-equiv="Content-Security-Policy" content="${META_CSP}">`;
   if (html.includes('http-equiv="Content-Security-Policy"')) return html;
@@ -35,6 +38,7 @@ export function headersDocument(): string {
   return [
     "/*",
     `  Content-Security-Policy: ${HEADER_CSP}`,
+    `  Strict-Transport-Security: ${STRICT_TRANSPORT_SECURITY}`,
     "  X-Frame-Options: DENY",
     "  X-Content-Type-Options: nosniff",
     "  Referrer-Policy: no-referrer",
@@ -48,6 +52,14 @@ export function headersDocument(): string {
   ].join("\n");
 }
 
+const MARK = `<svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#0e3b38"/>
+          <rect x="8" y="6" width="16" height="20" rx="2" fill="#f7f4ee"/>
+          <rect x="11" y="10" width="10" height="2" fill="#0e3b38"/>
+          <rect x="11" y="15" width="7" height="2" fill="#c9a227"/>
+          <rect x="11" y="20" width="10" height="2" fill="#0e3b38"/>
+        </svg>`;
+
 export function page404(): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -58,10 +70,21 @@ export function page404(): string {
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="${META_CSP}">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="/404.css">
 </head>
 <body>
-  <main class="wrap">
+  <header class="site-header">
+    <div class="wrap bar">
+      <p class="brand">
+        ${MARK}
+        <span>Isolated Sources</span>
+      </p>
+    </div>
+  </header>
+  <main id="main" class="wrap">
     <h1>This page is not here.</h1>
     <p><a href="/">Back to Isolated Sources</a></p>
   </main>
