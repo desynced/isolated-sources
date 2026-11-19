@@ -26,6 +26,12 @@ describe("content security policy", () => {
     const headers = headersDocument();
     expect(headers.indexOf("\n/*\n")).toBeLessThan(headers.indexOf("\n/ocr\n"));
     expect(headers.indexOf("\n/ocr\n")).toBeLessThan(headers.indexOf("\n/ocr/*\n"));
+    expect(headers.indexOf("\n/ocr/*\n")).toBeLessThan(headers.indexOf("\n/bookmarklet*\n"));
+    expect(headers.indexOf("\n/bookmarklet*\n")).toBeLessThan(headers.indexOf("\n/scrub-selection*\n"));
+    const scrubRule = headers.slice(headers.indexOf("\n/scrub-selection*\n"));
+    expect(scrubRule).toContain("! Cross-Origin-Opener-Policy");
+    expect(scrubRule).toContain("Cross-Origin-Opener-Policy: unsafe-none");
+    expect(scrubRule).not.toContain("Content-Security-Policy");
     expect(STRICT_TRANSPORT_SECURITY).toBe("max-age=31536000; includeSubDomains");
     expect(headers).toContain(`Strict-Transport-Security: ${STRICT_TRANSPORT_SECURITY}`);
     expect(headers).toContain("! Content-Security-Policy");
@@ -45,6 +51,12 @@ describe("content security policy", () => {
     }
 
     for (const path of ["/bookmarklet", "/bookmarklet.html", "/bookmarklet/"]) {
+      const page = applyHeaders(headers, path);
+      expect(page.get("content-security-policy")).toEqual([HEADER_CSP]);
+      expect(page.get("cross-origin-opener-policy")).toEqual(["unsafe-none"]);
+    }
+
+    for (const path of ["/scrub-selection", "/scrub-selection.html", "/scrub-selection/"]) {
       const page = applyHeaders(headers, path);
       expect(page.get("content-security-policy")).toEqual([HEADER_CSP]);
       expect(page.get("cross-origin-opener-policy")).toEqual(["unsafe-none"]);

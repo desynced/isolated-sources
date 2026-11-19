@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scrubbed selection — Isolated Sources</title>
+  <meta name="description" content="The selected text is scrubbed in this tab. It is not uploaded.">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#f7f4ee">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap bar">
+      <p class="brand"><a href="/">Isolated Sources</a></p>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <h1>Scrubbed selection</h1>
+    <div id="scrub-direct" hidden>
+      <p>This page is meant to be opened by the bookmarklet.</p>
+      <p><a href="/bookmarklet">Set up the bookmarklet</a></p>
+    </div>
+    <p id="scrub-waiting" hidden>Waiting for the selected text.</p>
+    <div id="scrub-result" hidden>
+      <p id="scrub-local">This text was scrubbed in this tab. It was not uploaded.</p>
+      <p id="scrub-status" role="status"></p>
+      <pre id="scrub-output" class="text-out" translate="no"></pre>
+      <p class="actions"><button type="button" id="scrub-copy">Copy scrubbed text</button></p>
+      <p class="footnote">Helps identify and replace common identifiers. You must review before sharing.</p>
+      <p><a id="scrub-home" href="/">Back to the home page</a></p>
+    </div>
+  </main>
+  <script type="module" src="/src/scrub-selection-page.ts"></script>
+</body>
+</html>
