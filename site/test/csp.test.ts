@@ -50,6 +50,17 @@ describe("content security policy", () => {
       expect(page.get("cross-origin-opener-policy")).toEqual(["unsafe-none"]);
     }
 
+    const scrubRule = headers.slice(headers.indexOf("\n/scrub-selection*\n"));
+    expect(scrubRule).toContain("! Cross-Origin-Opener-Policy");
+    expect(scrubRule).toContain("Cross-Origin-Opener-Policy: unsafe-none");
+    expect(scrubRule).not.toContain("Content-Security-Policy");
+    for (const path of ["/scrub-selection", "/scrub-selection.html", "/scrub-selection/"]) {
+      const page = applyHeaders(headers, path);
+      expect(page.get("content-security-policy")).toEqual([HEADER_CSP]);
+      expect(page.get("cross-origin-opener-policy")).toEqual(["unsafe-none"]);
+      expect(page.get("cross-origin-resource-policy")).toEqual(["same-origin"]);
+    }
+
     const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
     expect(html).not.toContain("Content-Security-Policy");
     const built = injectCsp(html);

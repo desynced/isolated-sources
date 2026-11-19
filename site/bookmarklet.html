@@ -17,13 +17,15 @@
     </div>
   </header>
   <main id="main" class="wrap">
-    <h1>Bookmarklet</h1>
-    <p id="bookmarklet-caveat">This runs on other websites. Isolated Sources' security policy and airplane-mode self-test do not apply there. It does not send the text to a server.</p>
-    <p>Drag the link to your bookmarks bar. On another page, select text and open the bookmark. It reads that selection and hands it to a tab on this site. The text is scrubbed in that tab. It is not uploaded.</p>
-    <p><a id="bookmarklet-link" href="/">Scrub selection</a></p>
-    <h2>Bookmarklet source</h2>
-    <p class="hint">You can read the whole thing. It only reads the selection and passes it to this site in the browser.</p>
-    <pre id="bookmarklet-source" class="text-out"></pre>
+    <div id="bookmarklet-install">
+      <h1>Bookmarklet</h1>
+      <p id="bookmarklet-caveat">This runs on other websites. Isolated Sources' security policy and airplane-mode self-test do not apply there. It does not send the text to a server.</p>
+      <p>Drag the link to your bookmarks bar. On another page, select text and open the bookmark. It reads that selection and hands it to a tab on this site. The text is scrubbed in that tab. It is not uploaded.</p>
+      <p><a id="bookmarklet-link" href="/">Scrub selection</a></p>
+      <h2>Bookmarklet source</h2>
+      <p class="hint">You can read the whole thing. It only reads the selection and passes it to this site in the browser.</p>
+      <pre id="bookmarklet-source" class="text-out"></pre>
+    </div>
     <p id="bookmarklet-waiting" hidden>Waiting for the selected text from the other page.</p>
     <div id="bookmarklet-result" hidden>
       <h2>Scrubbed selection</h2>
