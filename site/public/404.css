@@ -35,24 +35,28 @@ body {
 .bar {
   display: flex;
   align-items: center;
-  min-height: 4.25rem;
-  padding: 0.75rem 0;
+  min-height: 5rem;
+  padding: 1rem 0;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   margin: 0;
-  font-weight: 600;
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
   letter-spacing: 0.01em;
 }
 
 .mark {
   display: block;
   flex: 0 0 auto;
-  width: 0.8em;
-  height: 0.8em;
+  width: 28px;
+  height: 28px;
+  shape-rendering: crispEdges;
 }
 
 main {
@@ -97,4 +101,20 @@ a:focus-visible {
   list-style: none;
   padding: 0;
   margin: 0.6rem 0 0;
+}
+
+@media (max-width: 480px) {
+  .bar {
+    min-height: 0;
+    padding: 0.75rem 0;
+  }
+
+  .brand {
+    font-size: 1.1rem;
+  }
+
+  .mark {
+    width: 24px;
+    height: 24px;
+  }
 }
