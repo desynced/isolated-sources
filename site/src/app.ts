@@ -1,5 +1,7 @@
 import { restore, type Finding, type ResidualFinding, type RestoreResult } from "../../src/index.js";
+import { focusCompareLink, renderCompare } from "./compare-view.js";
 import { PAGE_TITLE } from "./meta.js";
+import { PROMPT_STARTERS } from "./prompts.js";
 import { SAMPLE_PARTIES, SAMPLE_TEXT, buildSampleAnswer } from "./sample.js";
 import { runSelfTest, selfTestMessage } from "./self-test.js";
 import {
@@ -37,7 +39,14 @@ export function mount(doc: Document): void {
   const parties = required<HTMLTextAreaElement>("known-parties");
   const pasteError = required<HTMLElement>("paste-error");
   const scrubButton = required<HTMLButtonElement>("scrub-button");
+  const scrubbedHeading = required<HTMLElement>("scrubbed-heading");
   const scrubbedView = required<HTMLElement>("scrubbed-view");
+  const comparePanel = required<HTMLElement>("compare-panel");
+  const originalView = required<HTMLElement>("original-view");
+  const compareScrubbed = required<HTMLElement>("compare-scrubbed-view");
+  const viewScrubbed = required<HTMLButtonElement>("view-scrubbed");
+  const viewCompare = required<HTMLButtonElement>("view-compare");
+  const promptHost = required<HTMLElement>("prompt-starters");
   const findingsSummary = required<HTMLElement>("findings-summary");
   const findingsEmpty = required<HTMLElement>("findings-empty");
   const findings = required<HTMLElement>("findings");
@@ -68,6 +77,7 @@ export function mount(doc: Document): void {
   let pending: PendingRange | null = null;
   let sampleOn = false;
   let stagedAnswer = "";
+  let compareOn = false;
 
   const setSession = (next: ScrubState | null): void => {
     state = next;
@@ -96,6 +106,26 @@ export function mount(doc: Document): void {
   };
 
   setSession(null);
+
+  for (const starter of PROMPT_STARTERS) {
+    const article = doc.createElement("article");
+    article.className = "prompt";
+    const title = doc.createElement("h4");
+    title.id = `prompt-title-${starter.id}`;
+    title.textContent = starter.title;
+    const pre = doc.createElement("pre");
+    pre.id = `prompt-text-${starter.id}`;
+    pre.className = "text-out prompt-text";
+    pre.textContent = starter.text;
+    const copy = doc.createElement("button");
+    copy.type = "button";
+    copy.className = "secondary";
+    copy.dataset.action = "copy-prompt";
+    copy.dataset.prompt = starter.id;
+    copy.textContent = `Copy ${starter.title.toLowerCase()} prompt`;
+    article.append(title, pre, copy);
+    promptHost.append(article);
+  }
 
   for (const kind of KINDS) {
     const option = doc.createElement("option");
@@ -315,10 +345,30 @@ export function mount(doc: Document): void {
     return li;
   };
 
+  const renderCompareView = (): void => {
+    if (!state) {
+      originalView.replaceChildren();
+      compareScrubbed.replaceChildren();
+      return;
+    }
+    renderCompare(doc, originalView, compareScrubbed, state.source, state.findings);
+  };
+
+  const setCompare = (on: boolean): void => {
+    compareOn = on;
+    comparePanel.hidden = !on;
+    scrubbedView.hidden = on;
+    viewScrubbed.setAttribute("aria-pressed", on ? "false" : "true");
+    viewCompare.setAttribute("aria-pressed", on ? "true" : "false");
+    scrubbedHeading.textContent = on ? "Original and scrubbed text" : "Scrubbed text";
+  };
+
   const renderReview = (): void => {
     renderScrubbed();
     renderFindings();
     renderResidual();
+    renderCompareView();
+    setCompare(compareOn);
   };
 
   const renderReport = (
@@ -377,6 +427,8 @@ export function mount(doc: Document): void {
 
   const clearOutputs = (): void => {
     scrubbedView.replaceChildren();
+    originalView.replaceChildren();
+    compareScrubbed.replaceChildren();
     findings.replaceChildren();
     residual.replaceChildren();
     findingsSummary.textContent = "";
@@ -530,6 +582,35 @@ export function mount(doc: Document): void {
     })();
   });
 
+  viewScrubbed.addEventListener("click", () => {
+    setCompare(false);
+    announce("Showing the scrubbed text.");
+  });
+
+  viewCompare.addEventListener("click", () => {
+    setCompare(true);
+    announce("Showing the original beside the scrubbed text. Each replacement links to its placeholder.");
+    originalView.focus();
+  });
+
+  comparePanel.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const link = target.closest("a");
+    if (!(link instanceof HTMLAnchorElement)) return;
+    if (!focusCompareLink(doc, link)) return;
+    event.preventDefault();
+  });
+
+  promptHost.addEventListener("click", (event) => {
+    const button = buttonFrom(event);
+    if (!button || button.dataset.action !== "copy-prompt") return;
+    const starter = PROMPT_STARTERS.find((item) => item.id === button.dataset.prompt);
+    if (!starter) return;
+    const pre = doc.getElementById(`prompt-text-${starter.id}`);
+    void copyFrom(starter.text, pre ?? button, `${starter.title} prompt copied.`);
+  });
+
   required<HTMLButtonElement>("copy-scrubbed").addEventListener("click", () => {
     if (!state) return;
     void copyFrom(state.scrubbed, scrubbedView, "Scrubbed text copied.");
@@ -544,7 +625,9 @@ export function mount(doc: Document): void {
     sampleOn = false;
     syncSample();
     pending = null;
+    compareOn = false;
     clearOutputs();
+    setCompare(false);
     showStep("paste");
     announce("Back to the text. Scrub again before you copy or restore.");
     source.focus();
@@ -596,11 +679,13 @@ export function mount(doc: Document): void {
     sampleOn = false;
     syncSample();
     pending = null;
+    compareOn = false;
     source.value = "";
     parties.value = "";
     missed.value = "";
     aiAnswer.value = "";
     clearOutputs();
+    setCompare(false);
     showStep("paste");
     announce("Session cleared. The text and mapping are gone from this tab.");
     source.focus();

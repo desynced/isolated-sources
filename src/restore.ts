@@ -73,6 +73,9 @@ export function restore(output: string, mapping: Record<string, string>): Restor
     const end = start + match[0].length;
     if (covered(start, end)) continue;
     if (brackets.some((span) => start >= span.start && end <= span.end)) continue;
+    // Ordinary words such as "SSN 123" share the prefix shape. Only a near-miss
+    // of a placeholder this session actually issued is reported.
+    if (!known.has(normalizePlaceholder(match[0]))) continue;
     altered.add(match[0]);
   }
 

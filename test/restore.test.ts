@@ -36,6 +36,17 @@ describe("exact restore", () => {
     expect(back.altered).toEqual(["PERSON_1", "[CASE_99]", "[PERSON_1 ]", "[person_1]"].sort());
   });
 
+  it("does not treat ordinary SSN wording as an altered placeholder", async () => {
+    const original = "The note says SSN 123 was incomplete. Email ada@example.com.";
+    const { text, mapping } = await scrub(original);
+    expect(text).toContain("SSN 123");
+    const back = restore(text, mapping);
+    expect(back.altered).not.toContain("SSN 123");
+    expect(back.altered.filter((item) => item.includes("SSN"))).toEqual([]);
+    expect(back.text).toContain("SSN 123");
+    expect(back.text).toContain("ada@example.com");
+  });
+
   it("does not treat a longer token as a shorter one", () => {
     const back = restore("See [PERSON_12] and [PERSON_1].", { "[PERSON_1]": "Alex Rivera" });
     expect(back.text).toBe("See [PERSON_12] and Alex Rivera.");

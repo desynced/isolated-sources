@@ -130,7 +130,7 @@ export function selfTestMessage(report: SelfTestReport): string {
       ? "Resource timing was not available, so this check cannot count requests and does not show that zero were made."
       : `Resource timing recorded ${report.requests} request${report.requests === 1 ? "" : "s"} during this run.`;
   const scope =
-    "That count is only what PerformanceObserver and resource timing can see for this page. connect-src 'none' tells the browser to block connections from the page. This does not detect airplane mode, and it does not cover extensions, other apps, or the rest of the device.";
+    "That count is only what PerformanceObserver and resource timing can see during this run. Requests that finished before the run, including files loaded with the page, are not included. connect-src 'none' tells the browser to block connections from the page. This does not detect airplane mode, and it does not cover extensions, other apps, or the rest of the device.";
   const unavailable =
     "connect-src 'none' tells the browser to block connections from the page. This run did not probe that policy, and it does not detect airplane mode.";
   return `${outcome} ${count} ${report.requests === null ? unavailable : scope}`;

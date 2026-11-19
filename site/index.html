@@ -60,7 +60,7 @@
       <div class="hero">
         <h1>Free scrubbing for personally identifiable information, in your browser.</h1>
         <ul class="hero-points">
-          <li>Light core. No model download and no servers. Your text stays in this browser.</li>
+          <li>Light core. No model download, and no server ever sees your text.</li>
           <li>Legal patterns built in: case, docket, Bates, and matter numbers, Judge, Plaintiff, and 'v.' cues, and a known-party list.</li>
           <li>Exact-only restore. It reports missing or altered placeholders instead of guessing.</li>
         </ul>
@@ -90,10 +90,31 @@
       <h2 id="review-heading" tabindex="-1">Review what was flagged</h2>
       <div class="panel-head">
         <h3 id="scrubbed-heading">Scrubbed text</h3>
-        <button type="button" id="copy-scrubbed">Copy scrubbed text</button>
+        <div class="view-actions">
+          <div class="view-toggle" role="group" aria-label="How to show the text">
+            <button type="button" id="view-scrubbed" aria-pressed="true">Scrubbed only</button>
+            <button type="button" id="view-compare" aria-pressed="false">Compare</button>
+          </div>
+          <button type="button" id="copy-scrubbed">Copy scrubbed text</button>
+        </div>
+      </div>
+      <div id="compare-panel" class="compare" hidden>
+        <div>
+          <h4 id="original-heading">Original</h4>
+          <div id="original-view" class="text-out" role="region" aria-labelledby="original-heading" tabindex="-1" translate="no"></div>
+        </div>
+        <div>
+          <h4 id="compare-scrubbed-heading">Scrubbed</h4>
+          <div id="compare-scrubbed-view" class="text-out" role="region" aria-labelledby="compare-scrubbed-heading" translate="no"></div>
+        </div>
       </div>
       <div id="scrubbed-view" class="text-out" role="region" aria-labelledby="scrubbed-heading" translate="no"></div>
       <p id="review-footnote" class="footnote">Helps identify and replace common identifiers. You must review before sharing.</p>
+      <section aria-labelledby="prompts-heading">
+        <h3 id="prompts-heading">Prompt starters</h3>
+        <p class="hint">Copy one and paste it above the scrubbed text. It asks the model to keep placeholders exactly as written.</p>
+        <div id="prompt-starters"></div>
+      </section>
 
       <h3 id="findings-heading" tabindex="-1">Findings</h3>
       <p id="findings-summary"></p>
@@ -171,9 +192,28 @@
       </ul>
     </section>
 
+    <section id="metadata-tool" aria-labelledby="metadata-heading">
+      <h2 id="metadata-heading">Strip file metadata</h2>
+      <p id="metadata-limits" class="hint">Choose a Word file (.docx), a PDF, or a photo (JPEG, PNG, or HEIC). The file stays in this browser. This clears author names, the last-modified-by name, and personal document properties when they are present. Tracked deleted text stays in the document. It does not remove text you can see, or the picture itself. PDFs with a complex structure may keep some data. You must review the cleaned file before you share it.</p>
+      <div class="field">
+        <label for="metadata-file">File</label>
+        <input id="metadata-file" type="file" accept=".docx,.pdf,.jpg,.jpeg,.png,.heic,.heif,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/heic,image/heif">
+      </div>
+      <p id="metadata-error" class="alert" role="alert" tabindex="-1"></p>
+      <div id="metadata-result" hidden>
+        <h3 id="metadata-found-heading" tabindex="-1">What was found</h3>
+        <p id="metadata-empty" hidden>None of the fields this check looks for were present. You can still download the file after the cleaning pass.</p>
+        <ul id="metadata-found" class="fact-list"></ul>
+        <ul id="metadata-notes" class="notes"></ul>
+        <div class="actions">
+          <button type="button" id="metadata-download">Download cleaned file</button>
+        </div>
+      </div>
+    </section>
+
     <section id="self-test" class="self-test" aria-labelledby="self-test-heading">
       <h2 id="self-test-heading">Airplane-mode self-test</h2>
-      <p id="self-test-note" class="hint">One click scrubs and restores sample text in this tab, then counts requests with PerformanceObserver and resource timing. This page is built with connect-src 'none', so the browser blocks connections from the page. The count does not detect airplane mode, and it does not cover extensions, other apps, or the rest of the device.</p>
+      <p id="self-test-note" class="hint">One click scrubs and restores sample text in this tab, then counts requests with PerformanceObserver and resource timing during that run. File tools are loaded with the page, and those earlier requests are not part of the count. This page is built with connect-src 'none', so the browser blocks connections from the page. The count does not detect airplane mode, and it does not cover extensions, other apps, or the rest of the device.</p>
       <button type="button" id="self-test-button" class="secondary">Run self-test</button>
       <p id="self-test-result" aria-live="polite"></p>
     </section>
@@ -182,9 +222,9 @@
     <div class="wrap">
       <p class="memory-note">The mapping is held in memory for this tab. Clear session drops it.</p>
       <ul class="footer-links">
-        <li><a href="https://github.com/desynced/isolated-sources" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">GitHub<span class="visually-hidden"> (opens in a new tab)</span></a></li>
-        <li><a href="https://github.com/desynced/isolated-sources/blob/main/LICENSE" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">MIT License<span class="visually-hidden"> (opens in a new tab)</span></a></li>
-        <li>Recognizers for common identifiers are ported from <a href="https://github.com/data-privacy-stack/presidio" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">Microsoft Presidio<span class="visually-hidden"> (opens in a new tab)</span></a>.</li>
+        <li>Open source, MIT.</li>
+        <li><a href="/LICENSE">MIT License</a></li>
+        <li><a href="/NOTICE">License notices</a></li>
         <li id="tip-item" hidden><a id="tip-link" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">Leave a tip<span class="visually-hidden"> (opens in a new tab)</span></a></li>
       </ul>
     </div>
