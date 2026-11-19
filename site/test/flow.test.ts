@@ -4,6 +4,8 @@ import { dirname, join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "../src/app.js";
 import { PAYPAL_ME_URL } from "../src/config.js";
+import { mountMetadata } from "../src/metadata-panel.js";
+import { PROMPT_GENERAL, PROMPT_LEGAL } from "../src/prompts.js";
 import { applyTipLink } from "../src/tip.js";
 
 function importPath(): string {
@@ -17,7 +19,7 @@ const TEXT = `Alex Rivera emailed jordan.quinn@example.com about Case No. 1:24-c
 Associate Pat Exampleton appeared. Reference 4155550199 in the index.`;
 
 const HERO = [
-  "Light core. No model download and no servers. Your text stays in this browser.",
+  "Light core. No model download, and no server ever sees your text.",
   "Legal patterns built in: case, docket, Bates, and matter numbers, Judge, Plaintiff, and 'v.' cues, and a known-party list.",
   "Exact-only restore. It reports missing or altered placeholders instead of guessing.",
 ];
@@ -27,6 +29,7 @@ function load(): void {
   const body = /<body[^>]*>([\s\S]*)<\/body>/i.exec(html)?.[1] ?? "";
   document.body.innerHTML = body.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
   mount(document);
+  mountMetadata(document);
 }
 
 function hidden(id: string): boolean {
@@ -86,12 +89,14 @@ describe("site page", () => {
     expect(document.getElementById("review-footnote")?.textContent).toBe(
       "Helps identify and replace common identifiers. You must review before sharing.",
     );
-    expect(document.querySelector('a[href="https://github.com/desynced/isolated-sources"]')?.textContent).toContain(
-      "GitHub",
-    );
-    expect(document.querySelector('a[href*="LICENSE"]')?.textContent).toContain("MIT License");
-    expect(document.body.textContent).toContain("Microsoft Presidio");
-    expect(document.querySelector('a[href="https://github.com/data-privacy-stack/presidio"]')).not.toBeNull();
+    expect(document.body.textContent).toContain("Open source, MIT.");
+    expect(document.querySelector('a[href="/LICENSE"]')?.textContent).toContain("MIT License");
+    expect(document.querySelector('a[href="/NOTICE"]')?.textContent).toContain("License notices");
+    expect(document.body.innerHTML.toLowerCase()).not.toContain("github");
+    expect(document.body.textContent?.toLowerCase()).not.toContain("presidio");
+    expect(document.getElementById("metadata-limits")?.textContent).toMatch(/tracked deleted text stays/i);
+    expect(document.getElementById("metadata-limits")?.textContent).toMatch(/does not remove text you can see/i);
+    expect(document.getElementById("metadata-limits")?.textContent).toMatch(/you must review/i);
     expect(document.getElementById("parties-hint")?.textContent).toContain("always replaced");
     expect(document.getElementById("parties-hint")?.textContent).toContain("Mr. Doe");
     expect(document.getElementById("parties-hint")?.textContent).toContain("at least three letters");
@@ -106,6 +111,7 @@ describe("site page", () => {
     expect(who.toLowerCase()).not.toMatch(/patient|clinic|hospital|hipaa|medical/);
     expect(document.getElementById("self-test-note")?.textContent).toContain("connect-src 'none'");
     expect(document.getElementById("self-test-note")?.textContent).toContain("does not detect airplane mode");
+    expect(document.getElementById("self-test-note")?.textContent).toContain("not part of the count");
     expect(hidden("tip-item")).toBe(true);
     const tip = document.getElementById("tip-link");
     const tipItem = document.getElementById("tip-item");
@@ -342,5 +348,55 @@ describe("site page", () => {
     expect(hidden("step-paste")).toBe(false);
     expect(hidden("clear-session")).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("compares original and scrubbed text and copies prompt starters", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
+    await scrub();
+
+    expect(hidden("compare-panel")).toBe(true);
+    expect(document.getElementById("prompt-text-general")?.textContent).toBe(PROMPT_GENERAL);
+    expect(document.getElementById("prompt-text-legal")?.textContent).toBe(PROMPT_LEGAL);
+    expect(PROMPT_GENERAL).toContain("[DOCKET_1]");
+    expect(PROMPT_LEGAL).toMatch(/reword/i);
+    expect(PROMPT_LEGAL).toMatch(/case/i);
+    expect(PROMPT_LEGAL).toMatch(/you must review/i);
+
+    const copyGeneral = [...document.querySelectorAll("button")].find(
+      (item) => item.textContent === "Copy general prompt",
+    );
+    if (!(copyGeneral instanceof HTMLButtonElement)) throw new Error("missing general prompt button");
+    copyGeneral.click();
+    await vi.waitFor(() => expect(writeText).toHaveBeenCalledWith(PROMPT_GENERAL));
+
+    button("view-compare").click();
+    expect(hidden("compare-panel")).toBe(false);
+    expect(button("view-compare").getAttribute("aria-pressed")).toBe("true");
+    expect(button("view-scrubbed").getAttribute("aria-pressed")).toBe("false");
+    const original = document.getElementById("original-view");
+    const scrubbed = document.getElementById("compare-scrubbed-view");
+    expect(original?.textContent).toContain("Alex Rivera");
+    expect(original?.textContent).toContain("jordan.quinn@example.com");
+    expect(scrubbed?.textContent).not.toContain("Alex Rivera");
+    expect(scrubbed?.textContent).not.toContain("jordan.quinn@example.com");
+
+    const links = [...(original?.querySelectorAll("a") ?? [])];
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      expect(link.getAttribute("aria-label")).toMatch(/replaced with \[[A-Z_]+_\d+\]/);
+      const dest = document.getElementById(link.getAttribute("href")?.slice(1) ?? "");
+      expect(dest?.textContent).toMatch(/\[[A-Z_]+_\d+\]/);
+      expect(dest?.getAttribute("aria-label")).toMatch(/Show original/);
+      expect(dest?.getAttribute("href")).toBe(`#${link.id}`);
+    }
+    const first = links[0];
+    if (!(first instanceof HTMLAnchorElement)) throw new Error("missing compare link");
+    first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(document.activeElement?.id).toBe(first.getAttribute("href")?.slice(1));
+
+    button("view-scrubbed").click();
+    expect(hidden("compare-panel")).toBe(true);
+    expect(hidden("scrubbed-view")).toBe(false);
   });
 });

@@ -34,9 +34,6 @@ Run `npm install`, then `npm run dev:site`, and open the local URL Vite prints.
 
 ## Next
 
-- Before/after compare, so a review can show the original span beside its placeholder.
-- Prompt starters that keep placeholders intact, so a model is asked not to rewrite tokens such as `[PERSON_1]`.
-- Metadata stripping for Word, PDF, and photos, removing properties that can carry names or locations. You must review the file you produce before you rely on it.
 - A journalist use case: notes and source names, with the known-party list, walked through on the page.
 
 ## Soon
@@ -44,6 +41,12 @@ Run `npm install`, then `npm run dev:site`, and open the local URL Vite prints.
 - A saveable redaction receipt, with an optional LightDrawer fingerprint of what this tab replaced. The receipt is a record of that session. You must review it before you rely on it.
 - Hidden-content checks for text a file can still carry where you might not see it.
 - Verified PDF redaction: flatten or rasterize redacted pages and check that no text layer remains under the redactions. The check looks at the file you produce. It is not a security guarantee, and you still have to review the result before you rely on it.
+
+### Later
+
+Bookmarklet to scrub text selected on another page. It runs on that other website, so this site's security policy and the airplane-mode self-test do not apply there. It does not send the text anywhere.
+
+Optional OCR for scanned PDFs and images. It stays off unless you choose a separate download of the engine and language data from this site. The main page does not load them.
 
 ## License
 

@@ -310,6 +310,105 @@ mark.placeholder {
   outline-offset: 2px;
 }
 
+.view-actions,
+.view-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.view-toggle button {
+  background: #fff;
+  color: var(--teal);
+}
+
+.view-toggle button[aria-pressed="true"] {
+  background: var(--teal);
+  color: #fff;
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.compare h4 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+mark.replaced {
+  background: #d9efe8;
+  color: var(--ink);
+  border: 1px solid var(--teal);
+  border-radius: 0.25rem;
+  padding: 0 0.2rem;
+}
+
+mark.replaced a,
+mark.placeholder a {
+  color: inherit;
+  text-underline-offset: 0.15em;
+}
+
+.prompt {
+  margin: 0.85rem 0;
+}
+
+.prompt h4 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.prompt-text {
+  min-height: 0;
+  margin-bottom: 0.6rem;
+}
+
+.fact-list,
+.notes {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+}
+
+.fact-list li {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 12rem) minmax(0, 1fr);
+  gap: 0.25rem 0.75rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fact-label {
+  font-weight: 600;
+}
+
+.fact-value,
+.notes li {
+  overflow-wrap: anywhere;
+}
+
+.notes li {
+  margin: 0.35rem 0;
+}
+
+input[type="file"] {
+  display: block;
+  width: 100%;
+  font: inherit;
+  min-height: 44px;
+}
+
+#metadata-tool {
+  margin-top: 1.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
 .finding-top,
 .residual-top {
   display: flex;
@@ -543,12 +642,36 @@ a {
   .residual-top button {
     width: 100%;
   }
+
+  .view-actions,
+  .view-toggle,
+  .view-actions > button,
+  .view-toggle button,
+  #metadata-download {
+    width: 100%;
+  }
+
+  .fact-list li {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 48rem) {
+  .compare {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 @media (forced-colors: active) {
-  mark.placeholder {
+  mark.placeholder,
+  mark.replaced {
     background: Highlight;
     color: HighlightText;
     border-color: CanvasText;
+  }
+
+  .view-toggle button[aria-pressed="true"] {
+    background: Highlight;
+    color: HighlightText;
   }
 }
