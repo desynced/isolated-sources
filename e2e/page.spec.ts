@@ -100,7 +100,18 @@ test("paste box is fully visible at 375x740", async ({ page }) => {
   expect(box!.y + box!.height).toBeLessThanOrEqual(740);
 });
 
-test("metadata strip still runs after the page goes offline", async ({ page }) => {
+function hiddenDocx(): Buffer {
+  return storedZip([
+    {
+      name: "word/document.xml",
+      data: Buffer.from(
+        `<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:rPr><w:vanish/></w:rPr><w:t>Vanished name</w:t></w:r></w:p></w:body></w:document>`,
+      ),
+    },
+  ]);
+}
+
+test("strip, hidden check, and receipt work after the page goes offline", async ({ page }) => {
   await page.goto("/");
   await page.evaluate(async () => {
     const ready = (window as unknown as { __pageChunksReady?: Promise<void> }).__pageChunksReady;
@@ -108,6 +119,7 @@ test("metadata strip still runs after the page goes offline", async ({ page }) =
     await ready;
   });
   await page.context().setOffline(true);
+
   await page.locator("#metadata-file").setInputFiles({
     name: "memo.docx",
     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -115,4 +127,23 @@ test("metadata strip still runs after the page goes offline", async ({ page }) =
   });
   await expect(page.locator("#metadata-found")).toContainText("Zelda Quinn", { timeout: 15_000 });
   await expect(page.locator("#metadata-error")).toHaveText("");
+
+  await page.locator("#hidden-file").setInputFiles({
+    name: "hidden.docx",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: hiddenDocx(),
+  });
+  await expect(page.locator("#hidden-found")).toContainText("Vanished name", { timeout: 15_000 });
+  await expect(page.locator("#hidden-error")).toHaveText("");
+
+  await page.locator("#source-text").fill("Ada Lovelace emailed ada@example.com.");
+  await page.locator("#known-parties").fill("Ada Lovelace");
+  await page.locator("#scrub-button").click();
+  await expect(page.locator("#step-review")).toBeVisible();
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.locator("#download-receipt").click(),
+  ]);
+  expect(download.suggestedFilename()).toBe("isolated-sources-receipt.zip");
+  await expect(page.locator("#status")).toContainText("Original values were left out");
 });

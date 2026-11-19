@@ -1,7 +1,9 @@
 import { restore, type Finding, type ResidualFinding, type RestoreResult } from "../../src/index.js";
 import { focusCompareLink, renderCompare } from "./compare-view.js";
+import { downloadBytes } from "./download.js";
 import { PAGE_TITLE } from "./meta.js";
 import { PROMPT_STARTERS } from "./prompts.js";
+import { buildReceipt, receiptArchive } from "./receipt.js";
 import { SAMPLE_PARTIES, SAMPLE_TEXT, buildSampleAnswer } from "./sample.js";
 import { runSelfTest, selfTestMessage } from "./self-test.js";
 import {
@@ -609,6 +611,26 @@ export function mount(doc: Document): void {
     if (!starter) return;
     const pre = doc.getElementById(`prompt-text-${starter.id}`);
     void copyFrom(starter.text, pre ?? button, `${starter.title} prompt copied.`);
+  });
+
+  required<HTMLButtonElement>("download-receipt").addEventListener("click", () => {
+    void (async () => {
+      if (!state) return;
+      const includeValues = required<HTMLInputElement>("receipt-values").checked;
+      const receipt = await buildReceipt({
+        findings: state.findings,
+        scrubbed: state.scrubbed,
+        createdAt: new Date().toISOString(),
+        includeValues,
+      });
+      const bytes = await receiptArchive(receipt);
+      downloadBytes(doc, bytes, "isolated-sources-receipt.zip", "application/zip");
+      announce(
+        includeValues
+          ? "Receipt downloaded. It includes the original values."
+          : "Receipt downloaded. Original values were left out.",
+      );
+    })();
   });
 
   required<HTMLButtonElement>("copy-scrubbed").addEventListener("click", () => {

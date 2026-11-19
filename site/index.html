@@ -139,6 +139,18 @@
       <p id="flag-error" class="alert" role="alert" tabindex="-1"></p>
       <p id="sample-note" class="hint" hidden></p>
       <p id="restore-prep" class="hint">Copy the scrubbed text, paste it into your AI, then come back and paste the answer to restore.</p>
+      <section aria-labelledby="receipt-heading">
+        <h3 id="receipt-heading">Redaction receipt</h3>
+        <p class="hint" id="receipt-hint">Download a JSON file and a readable copy of what was replaced: kinds and counts. Original values stay out unless you opt in. It also includes the SHA-256 of the scrubbed text. You can stamp the receipt file with LightDrawer (https://lightdrawer.org). Nothing is sent anywhere. You must review before you rely on it.</p>
+        <label class="check" for="receipt-values">
+          <input id="receipt-values" type="checkbox">
+          Include original values
+        </label>
+        <p id="receipt-values-hint" class="hint">Off by default. If you turn this on, the receipt contains the text that was replaced. Leave it off if you might share the file.</p>
+        <div class="actions">
+          <button type="button" id="download-receipt" class="secondary">Download receipt</button>
+        </div>
+      </section>
       <div class="actions">
         <button type="button" id="edit-text" class="secondary">Edit text</button>
         <button type="button" id="continue-restore">Continue to restore</button>
@@ -208,6 +220,22 @@
         <div class="actions">
           <button type="button" id="metadata-download">Download cleaned file</button>
         </div>
+      </div>
+    </section>
+
+    <section id="hidden-tool" aria-labelledby="hidden-heading">
+      <h2 id="hidden-heading">Hidden content check</h2>
+      <p id="hidden-limits" class="hint">Choose a PDF, a Word file (.docx), or an Excel file (.xlsx). This looks for text under dark boxes in a PDF, white or hidden text in Word and PDF, and hidden sheets, rows, or columns in Excel. It only reports. It can miss things, and it does not change the file. The file stays in this browser. You must review before you rely on it.</p>
+      <div class="field">
+        <label for="hidden-file">File</label>
+        <input id="hidden-file" type="file" accept=".pdf,.docx,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      </div>
+      <p id="hidden-error" class="alert" role="alert" tabindex="-1"></p>
+      <div id="hidden-result" hidden>
+        <h3 id="hidden-found-heading" tabindex="-1">What was found</h3>
+        <p id="hidden-empty" hidden>No hidden content of the kinds this check looks for was found. This is a best-effort check and can miss things.</p>
+        <ul id="hidden-found" class="fact-list"></ul>
+        <ul id="hidden-notes" class="notes"></ul>
       </div>
     </section>
 

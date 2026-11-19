@@ -2,6 +2,7 @@ import "./styles.css";
 import { pageChunksReady } from "./preload.js";
 import { mount } from "./app.js";
 import { PAYPAL_ME_URL } from "./config.js";
+import { mountHidden } from "./hidden-panel.js";
 import { mountMetadata } from "./metadata-panel.js";
 import { applyTipLink } from "./tip.js";
 
@@ -14,3 +15,4 @@ if (anchor instanceof HTMLAnchorElement && item instanceof HTMLElement) {
 window.__pageChunksReady = pageChunksReady;
 mount(document);
 mountMetadata(document);
+mountHidden(document);

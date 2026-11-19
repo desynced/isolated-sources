@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "../src/app.js";
+import { mountHidden } from "../src/hidden-panel.js";
 import { mountMetadata } from "../src/metadata-panel.js";
 
 function importPath(): string {
@@ -50,6 +51,7 @@ describe("airplane-mode self-test", () => {
     document.body.innerHTML = body.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
     mount(document);
     mountMetadata(document);
+    mountHidden(document);
 
     const source = document.getElementById("source-text");
     const scrub = document.getElementById("scrub-button");
